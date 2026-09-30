@@ -745,12 +745,28 @@ const CONFIG = {
       '<path d="M' + f(x - 3.9 * m) + ' ' + f(y - 1.2) + 'Q' + f(x - .2 * m) + ' ' + f(y - 8.2) + ' ' + f(x + 4.1 * m) + ' ' + f(y - 1.8) + 'L' + f(x + 4.9 * m) + ' ' + f(y - 3) + '" fill="none" stroke="' + CONT + '" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>' +
       '<path d="M' + f(x - 1.8) + ' ' + f(y + 5.6) + 'L' + f(x + 1.8) + ' ' + f(y + 5.6) + '" stroke="#d9819f" stroke-width=".7" stroke-linecap="round"/>';
     const arco = 'M' + q2(T2[0], T2[1]) + 'Q' + q2(G[0] + D[0] * C_ARCO, G[1] + D[1] * C_ARCO) + ' ' + q2(T1[0], T1[1]);
+    const QA = [G[0] + D[0] * C_ARCO, G[1] + D[1] * C_ARCO];
+    const naCurva = u => [(1 - u) * (1 - u) * T2[0] + 2 * u * (1 - u) * QA[0] + u * u * T1[0], (1 - u) * (1 - u) * T2[1] + 2 * u * (1 - u) * QA[1] + u * u * T1[1]];
+    const raminho = (u, lado) => {                     // raminho saindo do galho, com um brotinho na ponta
+      const [x, y] = naCurva(u), dx = D[0] + N[0] * lado, dy = D[1] + N[1] * lado, n = Math.hypot(dx, dy), x2 = x + dx / n * 5.2, y2 = y + dy / n * 5.2;
+      return '<path d="M' + q2(x, y) + 'L' + q2(x2, y2) + '" stroke="' + CONT + '" stroke-width="2.2" stroke-linecap="round"/>' +
+             '<path d="M' + q2(x, y) + 'L' + q2(x2, y2) + '" stroke="#9a6a45" stroke-width="1.1" stroke-linecap="round"/>' +
+             '<circle cx="' + f(x2) + '" cy="' + f(y2) + '" r="1.05" fill="#7fbf6a" ' + ct(.5) + '/>';
+    };
+    const pedra = u => {                                // pedrinha rosa em losango, deitada no galho
+      const [x, y] = naCurva(u), a = Math.atan2(N[1], N[0]) * 180 / Math.PI;
+      return '<g transform="translate(' + q2(x, y) + ') rotate(' + f(a) + ')"><path d="M-3 0L0 -1.7L3 0L0 1.7Z" fill="url(#mo)" stroke="' + COR.dourado + '" stroke-width=".7"/></g>';
+    };
+    const lacinho = (x, y) => '<path d="M' + x + ' ' + y + 'c-1.2 -2.2 -3.8 -2.6 -4 -.6c-.2 1.8 2 2 4 .6c2 1.4 4.2 1.2 4 -.6c-.2 -2 -2.8 -1.6 -4 .6z" fill="' + COR.rosa + '" ' + ct(.7) + '/>' +
+      '<circle cx="' + x + '" cy="' + y + '" r=".9" fill="' + COR.rosa + '" ' + ct(.6) + '/>';
     return '<defs>' +
       '<linearGradient id="mc" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffd2e7"/><stop offset=".5" stop-color="#fa9cc8"/><stop offset="1" stop-color="#e5709f"/></linearGradient>' +
       '<linearGradient id="mr" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffbfdc"/><stop offset=".5" stop-color="#ff85bd"/><stop offset="1" stop-color="#e5569c"/></linearGradient>' +
       '<linearGradient id="mv" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff6a7e"/><stop offset=".5" stop-color="' + COR.vermelho + '"/><stop offset="1" stop-color="#a8142e"/></linearGradient>' +
       '<linearGradient id="mo" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7a0a45"/><stop offset=".45" stop-color="#d63a8c"/><stop offset=".85" stop-color="#ff8cc6"/><stop offset="1" stop-color="#ffc6e2"/></linearGradient>' +
-      '<linearGradient id="ml" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff9ccc"/><stop offset="1" stop-color="' + COR.rosaEscuro + '"/></linearGradient>' +
+      '<linearGradient id="mw" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff"/><stop offset="1" stop-color="#efe1ec"/></linearGradient>' +
+      '<linearGradient id="mp" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffc4df"/><stop offset="1" stop-color="#ff8fc4"/></linearGradient>' +
+      '<linearGradient id="mcr" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fffbe8"/><stop offset="1" stop-color="#ffecb4"/></linearGradient>' +
       '<linearGradient id="ma" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ff9ccc"/><stop offset="1" stop-color="#c2317c"/></linearGradient>' +
       '<radialGradient id="gFlor" cx=".4" cy=".35" r=".7"><stop offset="0" stop-color="#ffd8ea"/><stop offset=".55" stop-color="#ff8cc4"/><stop offset="1" stop-color="' + COR.rosaEscuro + '"/></radialGradient>' +
       '<linearGradient id="gFolha" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8fdc9c"/><stop offset="1" stop-color="#3e9b58"/></linearGradient>' +
@@ -761,36 +777,43 @@ const CONFIG = {
     '<path d="M-7.2 -80.6C-11 -86.4 -19 -88.4 -24.2 -83.4C-28.8 -78.8 -29.4 -70 -27.2 -61.8C-26.2 -65.8 -24.6 -69.2 -22.4 -71.6C-22.8 -67 -22.4 -62.8 -21 -59C-18.8 -64.2 -18.4 -70.4 -19.2 -75.4C-16.6 -77.8 -13.2 -78.8 -9.8 -78.4Z" fill="url(#mc)" ' + ct(1.4) + '/>' +
     '<path d="M15.2 -80.6C19 -86.4 27 -88.4 32.2 -83.4C36.8 -78.8 37.4 -70 35.2 -61.8C34.2 -65.8 32.6 -69.2 30.4 -71.6C30.8 -67 30.4 -62.8 29 -59C26.8 -64.2 26.4 -70.4 27.2 -75.4C24.6 -77.8 21.2 -78.8 17.8 -78.4Z" fill="url(#mc)" ' + ct(1.4) + '/>' +
     '<path d="M-10.4 -82.2C-15.6 -85.4 -21.4 -84.6 -24.2 -80M18.4 -82.2C23.6 -85.4 29.4 -84.6 32.2 -80" fill="none" stroke="#fff" stroke-opacity=".55" stroke-width="1.1" stroke-linecap="round"/>' +
-    // pernas de meia branca e sapatinho vermelho de lacinho
-    '<path d="M-2 -15L-2.6 -3.4M8 -15L8.6 -3.4" stroke="' + CONT + '" stroke-width="5.8" stroke-linecap="round"/>' +
-    '<path d="M-2 -15L-2.6 -3.4M8 -15L8.6 -3.4" stroke="#fff" stroke-width="4.2" stroke-linecap="round"/>' +
-    '<ellipse cx="-3.8" cy="-2.3" rx="4" ry="2.4" fill="url(#mv)" ' + ct(1.2) + '/>' +
-    '<ellipse cx="9.8" cy="-2.3" rx="4" ry="2.4" fill="url(#mv)" ' + ct(1.2) + '/>' +
-    '<path d="M-2.6 -4.2l-2.4 -1.5v3zM-2.6 -4.2l2.4 -1.5v3zM8.6 -4.2l-2.4 -1.5v3zM8.6 -4.2l2.4 -1.5v3z" fill="' + COR.vermelho + '" ' + ct(.6) + '/>' +
-    // saia bufante: dois babados brancos por baixo, a saia rosa com a barrinha branca e a faixa
-    '<path d="M-4 -30C-8.4 -25 -13.4 -17.6 -16.6 -11.8Q-12.4 -8 -7.8 -10.6Q-3.8 -7.6 .2 -10.2Q3.2 -7.8 6.2 -10.2Q10 -7.6 13.8 -10.6Q18.6 -8 22.6 -11.8C19.6 -17.6 14.4 -25 10 -30Z" fill="#fff" ' + ct(1.2) + '/>' +
-    '<path d="M-4 -31C-8 -26 -12.8 -19 -15.8 -13.6Q-12 -9.8 -7.6 -12.4Q-3.8 -9.4 0 -12Q3 -9.6 6 -12Q9.8 -9.4 13.6 -12.4Q18 -9.8 21.8 -13.6C19 -19 14 -26 10 -31Z" fill="#fff" ' + ct(1.2) + '/>' +
-    '<path d="M-4 -33.5C-8 -28.5 -12.8 -21.5 -15.6 -16.2Q-11.8 -12.6 -7.6 -15.2Q-3.8 -12.2 0 -14.8Q3 -12.4 6 -14.8Q9.8 -12.2 13.6 -15.2Q17.8 -12.6 21.6 -16.2C18.8 -21.5 14 -28.5 10 -33.5Z" fill="url(#mr)" ' + ct(1.4) + '/>' +
-    '<path d="M-14.4 -16.4Q-11.4 -13.8 -7.6 -16.2Q-3.8 -13.2 0 -15.8Q3 -13.4 6 -15.8Q9.8 -13.2 13.6 -16.2Q17.2 -13.8 20.4 -16.4" fill="none" stroke="#fff" stroke-width="1.2" stroke-linecap="round"/>' +
-    '<path d="M3 -31.5L1.8 -17.4M-1.8 -31L-6 -17.8M7.8 -31L11.6 -17.8" stroke="#d24a8d" stroke-opacity=".5" stroke-width=".9" stroke-linecap="round"/>' +
-    '<path d="M-4.6 -34.8Q3 -32.8 10.6 -34.8L10.3 -32Q3 -30.2 -4.3 -32Z" fill="' + COR.rosaEscuro + '" ' + ct(1.1) + '/>' +
-    // braço do arco (luva branca), por baixo da manga
+    // pernas: meia branca com babadinho e o sapato boneca vermelho, com a fita amarrada no tornozelo
+    '<path d="M-2 -13L-2.6 -3.4M8 -13L8.6 -3.4" stroke="' + CONT + '" stroke-width="5.8" stroke-linecap="round"/>' +
+    '<path d="M-2 -13L-2.6 -3.4M8 -13L8.6 -3.4" stroke="' + pele + '" stroke-width="4.2" stroke-linecap="round"/>' +
+    '<path d="M-2.4 -7.2L-2.6 -3.4M8.4 -7.2L8.6 -3.4" stroke="#fff" stroke-width="4.2" stroke-linecap="round"/>' +
+    '<ellipse cx="-2.4" cy="-7.4" rx="3.2" ry="1.3" fill="#fff" ' + ct(.8) + '/><ellipse cx="8.4" cy="-7.4" rx="3.2" ry="1.3" fill="#fff" ' + ct(.8) + '/>' +
+    '<ellipse cx="-3.8" cy="-2.2" rx="4.2" ry="2.5" fill="url(#mv)" ' + ct(1.2) + '/>' +
+    '<ellipse cx="9.8" cy="-2.2" rx="4.2" ry="2.5" fill="url(#mv)" ' + ct(1.2) + '/>' +
+    '<path d="M-4.9 -4.9L-.5 -3.6M7.1 -3.6L11.5 -4.9" stroke="' + COR.vermelhoEscuro + '" stroke-width="1.1" stroke-linecap="round"/>' +
+    '<path d="M-5.4 -4.8l-2.3 -1.5v3zM-5.4 -4.8l2.1 -1.6v3zM12 -4.8l-2.1 -1.6v3zM12 -4.8l2.3 -1.5v3z" fill="' + COR.vermelho + '" ' + ct(.5) + '/>' +
+    // a saia: o balão branco com babado embaixo e, por cima, a saia rosa em pétalas pontudas, com a beirada vermelha
+    '<path d="M-12.8 -15.4Q-11 -11.4 -8.4 -13.4Q-6.2 -10.8 -3.8 -13Q-1.4 -10.6 1.2 -12.8Q3.6 -10.6 6 -12.8Q8.4 -10.6 10.8 -13Q13.2 -10.8 15.4 -13.4Q18 -11.4 19.8 -15.4Z" fill="#fff" ' + ct(1.1) + '/>' +
+    '<path d="M-5 -30C-13 -28 -19.6 -23.6 -19.8 -19.6C-20 -16.4 -16.4 -14.2 -11.6 -14Q3 -12.8 17.6 -14C22.4 -14.2 26 -16.4 25.8 -19.6C25.6 -23.6 19 -28 11 -30Z" fill="url(#mw)" ' + ct(1.3) + '/>' +
+    '<path d="M-14 -18Q-7 -15.6 0 -16.6M6 -16.6Q13 -15.6 20 -18" fill="none" stroke="#e3cfe0" stroke-width=".9" stroke-linecap="round"/>' +
+    '<path d="M.6 -33.8L-4.4 -33.8C-7.4 -31.4 -11 -27.6 -14.4 -22.8L-9.6 -24.4L-5.6 -18.8L-2 -23.4L.4 -23.6Z" fill="url(#mp)" stroke="' + COR.vermelhoEscuro + '" stroke-width="1.3" stroke-linejoin="round"/>' +
+    '<path d="M5.4 -33.8L10.4 -33.8C13.4 -31.4 17 -27.6 20.4 -22.8L15.6 -24.4L11.6 -18.8L8 -23.4L5.6 -23.6Z" fill="url(#mp)" stroke="' + COR.vermelhoEscuro + '" stroke-width="1.3" stroke-linejoin="round"/>' +
+    '<path d="M-12.4 -25.2l.7 1.2l.7 -1.2M-6.3 -22.4l.7 1.2l.7 -1.2M11 -22.4l.7 1.2l.7 -1.2M17.2 -25.2l.7 1.2l.7 -1.2" fill="none" stroke="#fff" stroke-width=".6" stroke-linecap="round" stroke-linejoin="round"/>' +
+    lacinho(-6.4, -29.8) + lacinho(12.4, -29.8) +
+    // braço do arco, de fora (a luva branca é só na mão), por baixo da manga
     '<path d="M-6 -43L' + q2(G[0], G[1]) + '" stroke="' + CONT + '" stroke-width="5.8" stroke-linecap="round"/>' +
-    '<path d="M-6 -43L' + q2(G[0], G[1]) + '" stroke="#fff" stroke-width="4.2" stroke-linecap="round"/>' +
-    // blusinha branca, laçarote no peito e a gargantilha com a Soul Gem
-    '<path d="M-3.6 -45C-5 -41 -5 -37 -3.8 -33.8L9.8 -33.8C11 -37 11 -41 9.6 -45Q3 -43 -3.6 -45Z" fill="#fff5fa" ' + ct(1.3) + '/>' +
-    '<path d="M1.4 -38L4.6 -38L5.4 -34L.6 -34Z" fill="' + COR.rosa + '"/>' +
+    '<path d="M-6 -43L' + q2(G[0], G[1]) + '" stroke="' + pele + '" stroke-width="4.2" stroke-linecap="round"/>' +
+    // o corpete: rosa dos lados e a frente creme listrada, com botõezinhos e babado, descendo até o meio da saia
+    '<path d="M-3.6 -45C-5 -41 -5 -37 -3.8 -33.8L9.8 -33.8C11 -37 11 -41 9.6 -45Q3 -43 -3.6 -45Z" fill="url(#mr)" ' + ct(1.3) + '/>' +
+    '<path d="M.6 -44.2L5.4 -44.2L5.6 -23.4Q3 -22.4 .4 -23.4Z" fill="url(#mcr)" ' + ct(.9) + '/>' +
+    '<path d="M1.9 -43.6L1.8 -24M4.1 -43.6L4.2 -24" stroke="#fff" stroke-opacity=".85" stroke-width=".6"/>' +
+    '<path d="M3 -40.2v0M3 -35.8v0M3 -31.4v0M3 -27v0" stroke="#e59ab8" stroke-width="1.3" stroke-linecap="round"/>' +
+    '<path d="M.3 -43.6L.1 -24M5.7 -43.6L5.9 -24" stroke="#fff" stroke-width="1.4" stroke-linecap="round" stroke-dasharray="0 1.7"/>' +
+    '<path d="M-3.2 -44.6Q3 -42.4 9.2 -44.6" fill="none" stroke="#fff" stroke-width="1.2" stroke-linecap="round"/>' +
+    // pescoço, a gargantilha vermelha com a Soul Gem pendurada e a fitinha caindo do lado
     '<rect x=".8" y="-49" width="4.4" height="4.6" fill="' + pele + '"/>' +
+    '<path d="M5.4 -45.4L7.6 -40.8L6.4 -41.2L5.8 -40L4.8 -45Z" fill="url(#mv)" ' + ct(.6) + '/>' +
     '<path d="M.2 -46.8Q3 -45.4 5.8 -46.8L5.8 -44.8Q3 -43.4 .2 -44.8Z" fill="url(#mv)" ' + ct(.7) + '/>' +
-    '<ellipse cx="3" cy="-44.4" rx="1.35" ry="1.75" fill="url(#mo)" stroke="' + COR.dourado + '" stroke-width=".6"/>' +
-    '<path d="M2.2 -38.8L.4 -34.4L2 -34.8L2.6 -33.2L3.4 -38.4Z M3.8 -38.8L5.6 -34.4L4 -34.8L3.4 -33.2L2.6 -38.4Z" fill="url(#mv)" ' + ct(.7) + '/>' +
-    '<path d="M3 -39.6C.6 -44 -4.6 -44.4 -5 -40.4C-5.4 -36.6 -.8 -36.6 3 -39.6C6.8 -36.6 11.4 -36.6 11 -40.4C10.6 -44.4 5.4 -44 3 -39.6Z" fill="url(#mv)" ' + ct(1) + '/>' +
-    '<path d="M1.6 -40.4C0 -42.4 -2.6 -42.8 -3.4 -41M4.4 -40.4C6 -42.4 8.6 -42.8 9.4 -41" fill="none" stroke="' + COR.vermelhoEscuro + '" stroke-opacity=".55" stroke-width=".8" stroke-linecap="round"/>' +
-    '<ellipse cx="3" cy="-39.6" rx="1.8" ry="1.6" fill="url(#mv)" ' + ct(.8) + '/>' +
-    // mangas bufantes
-    '<ellipse cx="-4.4" cy="-42.4" rx="5.4" ry="4.6" fill="url(#mr)" ' + ct(1.2) + '/>' +
-    '<ellipse cx="10.4" cy="-42.4" rx="5.4" ry="4.6" fill="url(#mr)" ' + ct(1.2) + '/>' +
-    '<path d="M-9.4 -39.6Q-4.4 -36.8 .6 -39.6M5.4 -39.6Q10.4 -36.8 15.4 -39.6" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/>' +
+    '<path d="M3 -44.4L3 -43.6" stroke="' + COR.dourado + '" stroke-width=".7"/>' +
+    '<ellipse cx="3" cy="-42.2" rx="1.35" ry="1.75" fill="url(#mo)" stroke="' + COR.dourado + '" stroke-width=".6"/>' +
+    // mangas bufantes brancas, com o babado rosa
+    '<ellipse cx="-4.4" cy="-42.4" rx="5.4" ry="4.6" fill="url(#mw)" ' + ct(1.2) + '/>' +
+    '<ellipse cx="10.4" cy="-42.4" rx="5.4" ry="4.6" fill="url(#mw)" ' + ct(1.2) + '/>' +
+    '<path d="M-9.2 -39.4Q-8.2 -37.6 -6.8 -38.8Q-5.6 -37.2 -4.2 -38.4Q-2.8 -37 -1.4 -38.4Q-.2 -37.4 .4 -39.2M5.6 -39.2Q6.2 -37.4 7.4 -38.4Q8.8 -37 10.2 -38.4Q11.6 -37.2 12.8 -38.8Q14.2 -37.6 15.2 -39.4" fill="none" stroke="#ff7eb9" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>' +
     // rosto: bochechas com risquinhos, olhos de mangá e o sorrisinho
     '<ellipse cx="4" cy="-61.4" rx="15.2" ry="14.4" fill="' + pele + '" ' + ct(1.5) + '/>' +
     '<ellipse cx="-6.8" cy="-53.4" rx="3" ry="1.5" fill="#ff8fb5" opacity=".55"/><ellipse cx="14.8" cy="-53.4" rx="3" ry="1.5" fill="#ff8fb5" opacity=".55"/>' +
@@ -805,14 +828,16 @@ const CONFIG = {
     '<path d="M-3.6 -78.4Q4 -81 11.6 -78.6" fill="none" stroke="#fff" stroke-opacity=".6" stroke-width="1.3" stroke-linecap="round"/>' +
     // os laços vermelhos grandões nas marias-chiquinhas
     laco(-9.4, -80.2, -32) + laco(17.4, -80.2, 32) +
-    // o arco é um galho de roseira, com a rosa na ponta de cima (como na arte da Madoka)
-    '<path d="' + arco + '" fill="none" stroke="' + CONT + '" stroke-width="4.4" stroke-linecap="round"/>' +
-    '<path d="' + arco + '" fill="none" stroke="url(#ma)" stroke-width="2.8" stroke-linecap="round"/>' +
-    '<path d="' + arco + '" fill="none" stroke="#ffe3f1" stroke-opacity=".7" stroke-width=".8" stroke-linecap="round" transform="translate(-.5 -.3)"/>' +
-    '<circle cx="' + f(T2[0]) + '" cy="' + f(T2[1]) + '" r="1.5" fill="' + COR.dourado + '" ' + ct(.8) + '/>' +
+    // o arco é um galho de roseira: marrom, com raminhos, duas pedrinhas rosa perto da mão, a rosa em cima e uma folha na ponta de baixo
+    '<path d="' + arco + '" fill="none" stroke="' + CONT + '" stroke-width="4" stroke-linecap="round"/>' +
+    '<path d="' + arco + '" fill="none" stroke="#9a6a45" stroke-width="2.5" stroke-linecap="round"/>' +
+    '<path d="' + arco + '" fill="none" stroke="#d2a57c" stroke-opacity=".8" stroke-width=".8" stroke-linecap="round" transform="translate(-.4 -.3)"/>' +
+    raminho(.8, .8) + raminho(.2, -.8) + raminho(.9, -.5) +
+    pedra(.36) + pedra(.64) +
+    '<circle cx="' + f(G[0]) + '" cy="' + f(G[1]) + '" r="3.6" fill="#ff9ccc" ' + ct(.9) + '/>' +
     '<circle cx="' + f(G[0]) + '" cy="' + f(G[1]) + '" r="2.9" fill="#fff" ' + ct(1.2) + '/>' +
-    folhaD(G[0] + N[0] * 10, G[1] + N[1] * 10, 160, 6.5) + folhaD(T1[0] - N[0] * 2, T1[1] - N[1] * 2, -20, 7) +
-    '<g transform="translate(' + q2(T1[0] + N[0] * 1.8, T1[1] + N[1] * 1.8) + ')">' + rosaD(4.6) + '</g>';
+    folhaD(T2[0], T2[1], 115, 6.5) + folhaD(T1[0] - N[0] * 1.6, T1[1] - N[1] * 1.6, -20, 5.5) +
+    '<g transform="translate(' + q2(T1[0] + N[0] * 2.2, T1[1] + N[1] * 2.2) + ')">' + rosaD(4.6) + '</g>';
   }
 
   // SVG -> canvas, já na resolução em que vai aparecer
@@ -990,13 +1015,16 @@ const CONFIG = {
     const nm = tl < EV.solta ? n : C_ARCO + PUXA, mao = [G[0] - D[0] * nm, G[1] - D[1] * nm];
     ctx.strokeStyle = CONT; ctx.lineWidth = 5.8;
     ctx.beginPath(); ctx.moveTo(OMBRO[0], OMBRO[1]); ctx.lineTo(mao[0], mao[1]); ctx.stroke();
-    ctx.strokeStyle = '#fff'; ctx.lineWidth = 4.2; ctx.stroke();
-    ctx.fillStyle = '#fff'; ctx.strokeStyle = CONT; ctx.lineWidth = 1.2;
+    ctx.strokeStyle = '#ffe9de'; ctx.lineWidth = 4.2; ctx.stroke();   // braço de fora; a luva é só na mão
+    ctx.strokeStyle = CONT; ctx.lineWidth = .9; ctx.fillStyle = '#ff9ccc';   // punho rosa da luva
+    ctx.beginPath(); ctx.arc(mao[0], mao[1], 3.6, 0, 7); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#fff'; ctx.lineWidth = 1.2;
     ctx.beginPath(); ctx.arc(mao[0], mao[1], 2.9, 0, 7); ctx.fill(); ctx.stroke();
-    ctx.fillStyle = '#ff94c4';                          // a manga bufante por cima do ombro
+    ctx.fillStyle = '#fbf4f9';                          // a manga bufante branca por cima do ombro, com o babado rosa
     ctx.beginPath(); ctx.ellipse(10.4, -42.4, 5.4, 4.6, 0, 0, 7); ctx.fill(); ctx.stroke();
-    ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.6;
-    ctx.beginPath(); ctx.moveTo(5.4, -39.6); ctx.quadraticCurveTo(10.4, -36.8, 15.4, -39.6); ctx.stroke();
+    ctx.strokeStyle = COR.rosa; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.moveTo(5.6, -39.2); ctx.quadraticCurveTo(6.2, -37.4, 7.4, -38.4); ctx.quadraticCurveTo(8.8, -37, 10.2, -38.4);
+    ctx.quadraticCurveTo(11.6, -37.2, 12.8, -38.8); ctx.quadraticCurveTo(14.2, -37.6, 15.2, -39.4); ctx.stroke();
     ctx.restore();
     ctx.globalAlpha = 1;
   }
