@@ -17,8 +17,8 @@
 
    De tempos em tempos tem FLECHA: a Madoka aparece no ar, em cima
    de um circulinho mágico, puxa o arco de rosa e solta uma flecha
-   de luz, que estoura no alto numa chuva de flechinhas e penas. A
-   Soul Gem acende, o círculo gira, a fita pula e o Kyubey fecha o
+   de luz, que estoura no alto num coração de luz, com chuva de
+   flechinhas e penas. A Soul Gem acende, o círculo gira, a fita pula e o Kyubey fecha o
    contrato. E de vez em quando ele solta um balãozinho oferecendo
    um contrato.
 
@@ -248,7 +248,7 @@ const CONFIG = {
   // área que o desenho ocupa (o resto da tela fica vazio): quanto passa da câmera pra cada lado
   let RX = 0, RY = 0, RR = SW, RB = SH;
   if (!SOLTA) {
-    const m = [400, 280, 40, 30];                       // esquerda (fita, penas e a flecha), cima, direita, embaixo
+    const m = [440, 300, 40, 30];                       // esquerda (penas, Madoka e a flecha), cima, direita, embaixo
     RX = Math.max(0, X - m[0] * k); RY = Math.max(0, Y - m[1] * k);
     RR = Math.min(SW, X + W + m[2] * k); RB = Math.min(SH, Y + H + m[3] * k);
   }
@@ -572,12 +572,12 @@ const CONFIG = {
     // ---- o Kyubey senta do lado de fora, lá embaixo, perto das rosinhas (no solto, em cima da borda de cima);
     //      a Madoka aparece em cima de um circulinho mágico, no ar, do lado do canto (no solto, em cima da borda) ----
     const kbP = !KYUBEY ? null : SOLTA ? { x: X + W * .3, y: Y + 1.4 * k } : { x: Math.max(RX + 30 * k, X - 44 * k), y: Math.min(SH, Y + H) - .5 * k, espelho: true };
-    madP = SOLTA ? { x: X + W * .66, y: Y + 1.2 * k } : { x: Math.max(RX + 60 * k, X - 84 * k), y: Y - 2 * k, plat: true };
+    madP = SOLTA ? { x: X + W * .66, y: Y + 1.2 * k } : { x: Math.max(RX + 70 * k, X - 96 * k), y: Y - 2 * k, plat: true };
 
     // ---- a flecha: sai do arco pra cima e pra esquerda e estoura no alto, dentro da área desenhada ----
     const sMa = TAM_MA * k;
     const [gx, gy] = MADOKA ? [madP.x + G[0] * sMa, madP.y + G[1] * sMa] : gemaP ? [gemaP.x, gemaP.y] : [X + 10 * k, Y + 10 * k];
-    const dist = Math.max(40 * k, Math.min((gx - RX - 75 * k) / -D[0], (gy - RY - 70 * k) / -D[1], 300 * k));
+    const dist = Math.max(40 * k, Math.min((gx - RX - 115 * k) / -D[0], (gy - RY - 105 * k) / -D[1], 300 * k));   // o estouro inteiro cabe na área
     alvo = { x: gx + D[0] * dist, y: gy + D[1] * dist, dx: gx, dy: gy };
 
     // ---- defs ----
@@ -690,9 +690,9 @@ const CONFIG = {
     bb.style.setProperty('--t', f((Dd + 2 * L) / (240 * k)) + 's');
 
     // ---- onde as penas caem: do lado de fora da câmera, nunca na frente dela ----
-    if (SOLTA) zonasP = [{ x0: 14 * k, x1: X - 18 * k, y0: 0, y1: SH }, { x0: X + W + 18 * k, x1: SW - 14 * k, y0: 0, y1: SH },
-                         { x0: X - 10 * k, x1: X + W + 10 * k, y0: 0, y1: Y - 26 * k }];
-    else zonasP = [{ x0: RX + 24 * k, x1: X - 22 * k, y0: RY, y1: RB }];
+    if (SOLTA) zonasP = [{ x0: 26 * k, x1: X - 22 * k, y0: 30 * k, y1: SH - 12 * k }, { x0: X + W + 22 * k, x1: SW - 26 * k, y0: 30 * k, y1: SH - 12 * k },
+                         { x0: X - 4 * k, x1: X + W + 4 * k, y0: 30 * k, y1: Y - 22 * k }];
+    else zonasP = [{ x0: Math.max(RX + 36 * k, X - 340 * k), x1: X - 24 * k, y0: RY + 34 * k, y1: RB }];   // à direita do painel de itens do LoL
     for (const z of zonasP) z.x1 = Math.max(z.x1, z.x0 + 10 * k);
     for (let i = 0; i < NP; i++) penas.push(novaPena(i, true));
   }
@@ -703,7 +703,7 @@ const CONFIG = {
   const PENA_VB = [-10, -25, 20, 50], TAM_PENA = .78;   // tamanho da pena (vezes k)
   const CORES_PENA = [['#ffffff', '#ffe4f1', '#ffa6d2'], ['#fff4fa', '#ffc2df', '#ff7eb9'], ['#ffd0e6', '#ff8cc4', '#e2489a'], ['#ffffff', '#fff6fb', '#ffcfe5']];
   // a Madoka mira pra cima e pra esquerda: D é pra onde a flecha vai, N é o arco em pé
-  const MADOKA_VB = [-40, -88, 76, 92], TAM_MA = 1;
+  const MADOKA_VB = [-40, -92, 80, 96], TAM_MA = 1.15;
   const ANG = 25 * Math.PI / 180, D = [-Math.cos(ANG), -Math.sin(ANG)], N = [Math.sin(ANG), -Math.cos(ANG)];
   const G = [-31, -56], L_ARCO = 21, C_ARCO = 5.5, PUXA = 13, L_FLECHA = 30;   // mão do arco, meio arco, curva, quanto a corda puxa, flecha
   const T1 = [G[0] + N[0] * L_ARCO - D[0] * C_ARCO, G[1] + N[1] * L_ARCO - D[1] * C_ARCO];   // ponta de cima do arco
@@ -724,77 +724,95 @@ const CONFIG = {
       '<path d="M.6 24Q.8 0 -1 -22" fill="none" stroke="#fff" stroke-width=".85" stroke-linecap="round"/>' +
       '<path d="M.5 13.5q-3.2 .6 -4.6 3.6M.6 15q-2.4 1.2 -2.8 4.4M.6 13.8q3.2 .4 4.4 3.4M.7 15.2q2.2 1.2 2.6 4.2" fill="none" stroke="#fff" stroke-opacity=".9" stroke-width=".8" stroke-linecap="round"/>';
   }
-  function madokaSVG() {                                // a Madoka de garota mágica, de lado, com o arco de rosa (a corda, a flecha e o braço que puxa são pintados no canvas)
+  function madokaSVG() {                                // a Madoka de garota mágica, com o arco de rosa (a corda, a flecha e o braço que puxa são pintados no canvas)
     const ct = w => 'stroke="' + CONT + '" stroke-width="' + w + '" stroke-linejoin="round"';
-    const pele = '#ffe8dc', q2 = (x, y) => f(x) + ' ' + f(y);
+    const pele = '#ffe9de', q2 = (x, y) => f(x) + ' ' + f(y);
+    // o laço vermelho grandão das marias-chiquinhas, com as duas pontinhas caindo
     const laco = (x, y, a) => '<g transform="translate(' + x + ' ' + y + ') rotate(' + a + ')">' +
-      '<path d="M0 0C-2 -4.2 -6.4 -5.2 -6.8 -1.2C-7.2 2.6 -3 2.8 0 0C3 2.8 7.2 2.6 6.8 -1.2C6.4 -5.2 2 -4.2 0 0Z" fill="url(#mv)" ' + ct(1.1) + '/>' +
-      '<circle r="1.6" fill="url(#mv)" ' + ct(.9) + '/></g>';
+      '<path d="M-.9 1.2L-5.4 9.8L-3.4 9L-2.4 11.2L1.4 2Z" fill="url(#mv)" ' + ct(.9) + '/>' +
+      '<path d="M.9 1.2L4.8 10L2.8 9.4L2 11.6L-1.2 2.2Z" fill="url(#mv)" ' + ct(.9) + '/>' +
+      '<path d="M0 0C-3 -6.4 -10.4 -8 -10.8 -2C-11.2 3.6 -4.6 4 0 0C4.6 4 11.2 3.6 10.8 -2C10.4 -8 3 -6.4 0 0Z" fill="url(#mv)" ' + ct(1.2) + '/>' +
+      '<path d="M-2 -1.2C-4 -4.4 -8 -5 -8.6 -2.4M2 -1.2C4 -4.4 8 -5 8.6 -2.4" fill="none" stroke="' + COR.vermelhoEscuro + '" stroke-opacity=".55" stroke-width="1.1" stroke-linecap="round"/>' +
+      '<path d="M-5 -5.6Q-8 -5.8 -9.4 -3.4M5 -5.6Q8 -5.8 9.4 -3.4" fill="none" stroke="#fff" stroke-opacity=".55" stroke-width=".9" stroke-linecap="round"/>' +
+      '<ellipse rx="2.3" ry="2.1" fill="url(#mv)" ' + ct(1) + '/></g>';
+    // olho de mangá: branco, íris rosa escura em cima e clarinha embaixo, dois brilhos e o cílio com a pontinha pra fora
+    const olho = (x, y, m) =>
+      '<ellipse cx="' + f(x) + '" cy="' + f(y) + '" rx="3.9" ry="5.3" fill="#fff"/>' +
+      '<ellipse cx="' + f(x) + '" cy="' + f(y + .5) + '" rx="3.5" ry="4.8" fill="url(#mo)"/>' +
+      '<ellipse cx="' + f(x) + '" cy="' + f(y + .4) + '" rx="1.6" ry="2.4" fill="#6d0739"/>' +
+      '<circle cx="' + f(x - 1.3) + '" cy="' + f(y - 1.9) + '" r="1.7" fill="#fff"/>' +
+      '<circle cx="' + f(x + 1.4) + '" cy="' + f(y + 2.4) + '" r=".8" fill="#fff"/>' +
+      '<path d="M' + f(x - 3.9 * m) + ' ' + f(y - 1.2) + 'Q' + f(x - .2 * m) + ' ' + f(y - 8.2) + ' ' + f(x + 4.1 * m) + ' ' + f(y - 1.8) + 'L' + f(x + 4.9 * m) + ' ' + f(y - 3) + '" fill="none" stroke="' + CONT + '" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>' +
+      '<path d="M' + f(x - 1.8) + ' ' + f(y + 5.6) + 'L' + f(x + 1.8) + ' ' + f(y + 5.6) + '" stroke="#d9819f" stroke-width=".7" stroke-linecap="round"/>';
     const arco = 'M' + q2(T2[0], T2[1]) + 'Q' + q2(G[0] + D[0] * C_ARCO, G[1] + D[1] * C_ARCO) + ' ' + q2(T1[0], T1[1]);
     return '<defs>' +
-      '<linearGradient id="mc" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffc9e2"/><stop offset=".55" stop-color="#f794c3"/><stop offset="1" stop-color="#e06aa6"/></linearGradient>' +
+      '<linearGradient id="mc" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffd2e7"/><stop offset=".5" stop-color="#fa9cc8"/><stop offset="1" stop-color="#e5709f"/></linearGradient>' +
       '<linearGradient id="mr" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffbfdc"/><stop offset=".5" stop-color="#ff85bd"/><stop offset="1" stop-color="#e5569c"/></linearGradient>' +
       '<linearGradient id="mv" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff6a7e"/><stop offset=".5" stop-color="' + COR.vermelho + '"/><stop offset="1" stop-color="#a8142e"/></linearGradient>' +
-      '<radialGradient id="mo" cx=".45" cy=".35" r=".7"><stop offset="0" stop-color="#ffd0e6"/><stop offset=".45" stop-color="#ff5fa8"/><stop offset="1" stop-color="#9e0f55"/></radialGradient>' +
+      '<linearGradient id="mo" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7a0a45"/><stop offset=".45" stop-color="#d63a8c"/><stop offset=".85" stop-color="#ff8cc6"/><stop offset="1" stop-color="#ffc6e2"/></linearGradient>' +
+      '<linearGradient id="ml" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff9ccc"/><stop offset="1" stop-color="' + COR.rosaEscuro + '"/></linearGradient>' +
       '<linearGradient id="ma" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ff9ccc"/><stop offset="1" stop-color="#c2317c"/></linearGradient>' +
       '<radialGradient id="gFlor" cx=".4" cy=".35" r=".7"><stop offset="0" stop-color="#ffd8ea"/><stop offset=".55" stop-color="#ff8cc4"/><stop offset="1" stop-color="' + COR.rosaEscuro + '"/></radialGradient>' +
       '<linearGradient id="gFolha" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8fdc9c"/><stop offset="1" stop-color="#3e9b58"/></linearGradient>' +
     '</defs>' +
-    // cabelo de trás e as marias-chiquinhas
-    '<path d="M-12 -56C-15 -68 -11 -80 3 -81.5C17 -82.5 22 -71 21 -60C20.6 -54 19 -49 17 -46L-9 -46C-11 -49 -12 -52 -12 -56Z" fill="url(#mc)" ' + ct(1.5) + '/>' +
-    '<path d="M-9.5 -70.5C-15 -73.5 -21.5 -72 -24.5 -66.5C-26.8 -62 -26.4 -55.5 -24 -50.5C-23.6 -55 -22.4 -59.6 -19.8 -62.4C-17.4 -64.8 -13.6 -65.8 -10.4 -65.2Z" fill="url(#mc)" ' + ct(1.4) + '/>' +
-    '<path d="M17.5 -70.5C23 -73.5 29.5 -72 32.5 -66.5C34.8 -62 34.4 -55.5 32 -50.5C31.6 -55 30.4 -59.6 27.8 -62.4C25.4 -64.8 21.6 -65.8 18.4 -65.2Z" fill="url(#mc)" ' + ct(1.4) + '/>' +
-    // pernas de meia branca e sapatinho rosa
+    // cabelo de trás, até a nuca
+    '<path d="M-13.6 -58C-16.4 -71 -11 -83.4 4.2 -84C19 -84.4 24.4 -72 22.6 -58.4C21.8 -52.4 20 -47.6 17.6 -44.6L-9.4 -44.6C-12 -48 -13.2 -52.4 -13.6 -58Z" fill="url(#mc)" ' + ct(1.5) + '/>' +
+    // as marias-chiquinhas: presas bem no alto da cabeça, sobem um pouquinho e caem pros lados, com a ponta repicada
+    '<path d="M-7.2 -80.6C-11 -86.4 -19 -88.4 -24.2 -83.4C-28.8 -78.8 -29.4 -70 -27.2 -61.8C-26.2 -65.8 -24.6 -69.2 -22.4 -71.6C-22.8 -67 -22.4 -62.8 -21 -59C-18.8 -64.2 -18.4 -70.4 -19.2 -75.4C-16.6 -77.8 -13.2 -78.8 -9.8 -78.4Z" fill="url(#mc)" ' + ct(1.4) + '/>' +
+    '<path d="M15.2 -80.6C19 -86.4 27 -88.4 32.2 -83.4C36.8 -78.8 37.4 -70 35.2 -61.8C34.2 -65.8 32.6 -69.2 30.4 -71.6C30.8 -67 30.4 -62.8 29 -59C26.8 -64.2 26.4 -70.4 27.2 -75.4C24.6 -77.8 21.2 -78.8 17.8 -78.4Z" fill="url(#mc)" ' + ct(1.4) + '/>' +
+    '<path d="M-10.4 -82.2C-15.6 -85.4 -21.4 -84.6 -24.2 -80M18.4 -82.2C23.6 -85.4 29.4 -84.6 32.2 -80" fill="none" stroke="#fff" stroke-opacity=".55" stroke-width="1.1" stroke-linecap="round"/>' +
+    // pernas de meia branca e sapatinho vermelho de lacinho
     '<path d="M-2 -15L-2.6 -3.4M8 -15L8.6 -3.4" stroke="' + CONT + '" stroke-width="5.8" stroke-linecap="round"/>' +
     '<path d="M-2 -15L-2.6 -3.4M8 -15L8.6 -3.4" stroke="#fff" stroke-width="4.2" stroke-linecap="round"/>' +
-    '<ellipse cx="-3.8" cy="-2.3" rx="4" ry="2.4" fill="url(#mr)" ' + ct(1.2) + '/>' +
-    '<ellipse cx="9.8" cy="-2.3" rx="4" ry="2.4" fill="url(#mr)" ' + ct(1.2) + '/>' +
-    // saia: babado branco por baixo, a saia rosa bufante e a faixa
-    '<path d="M-4 -31C-8 -26 -12.8 -19 -15.8 -13.6Q-12 -9.8 -7.6 -12.4Q-3.8 -9.4 0 -12Q3 -9.6 6 -12Q9.8 -9.4 13.6 -12.4Q18 -9.8 21.8 -13.6C19 -19 14 -26 10 -31Z" fill="#fff" ' + ct(1.3) + '/>' +
+    '<ellipse cx="-3.8" cy="-2.3" rx="4" ry="2.4" fill="url(#mv)" ' + ct(1.2) + '/>' +
+    '<ellipse cx="9.8" cy="-2.3" rx="4" ry="2.4" fill="url(#mv)" ' + ct(1.2) + '/>' +
+    '<path d="M-2.6 -4.2l-2.4 -1.5v3zM-2.6 -4.2l2.4 -1.5v3zM8.6 -4.2l-2.4 -1.5v3zM8.6 -4.2l2.4 -1.5v3z" fill="' + COR.vermelho + '" ' + ct(.6) + '/>' +
+    // saia bufante: dois babados brancos por baixo, a saia rosa com a barrinha branca e a faixa
+    '<path d="M-4 -30C-8.4 -25 -13.4 -17.6 -16.6 -11.8Q-12.4 -8 -7.8 -10.6Q-3.8 -7.6 .2 -10.2Q3.2 -7.8 6.2 -10.2Q10 -7.6 13.8 -10.6Q18.6 -8 22.6 -11.8C19.6 -17.6 14.4 -25 10 -30Z" fill="#fff" ' + ct(1.2) + '/>' +
+    '<path d="M-4 -31C-8 -26 -12.8 -19 -15.8 -13.6Q-12 -9.8 -7.6 -12.4Q-3.8 -9.4 0 -12Q3 -9.6 6 -12Q9.8 -9.4 13.6 -12.4Q18 -9.8 21.8 -13.6C19 -19 14 -26 10 -31Z" fill="#fff" ' + ct(1.2) + '/>' +
     '<path d="M-4 -33.5C-8 -28.5 -12.8 -21.5 -15.6 -16.2Q-11.8 -12.6 -7.6 -15.2Q-3.8 -12.2 0 -14.8Q3 -12.4 6 -14.8Q9.8 -12.2 13.6 -15.2Q17.8 -12.6 21.6 -16.2C18.8 -21.5 14 -28.5 10 -33.5Z" fill="url(#mr)" ' + ct(1.4) + '/>' +
-    '<path d="M3 -31.5L1.6 -15.6M-1.8 -31L-6.4 -16.2M7.8 -31L12 -16.2" stroke="#d24a8d" stroke-opacity=".5" stroke-width=".9" stroke-linecap="round"/>' +
+    '<path d="M-14.4 -16.4Q-11.4 -13.8 -7.6 -16.2Q-3.8 -13.2 0 -15.8Q3 -13.4 6 -15.8Q9.8 -13.2 13.6 -16.2Q17.2 -13.8 20.4 -16.4" fill="none" stroke="#fff" stroke-width="1.2" stroke-linecap="round"/>' +
+    '<path d="M3 -31.5L1.8 -17.4M-1.8 -31L-6 -17.8M7.8 -31L11.6 -17.8" stroke="#d24a8d" stroke-opacity=".5" stroke-width=".9" stroke-linecap="round"/>' +
     '<path d="M-4.6 -34.8Q3 -32.8 10.6 -34.8L10.3 -32Q3 -30.2 -4.3 -32Z" fill="' + COR.rosaEscuro + '" ' + ct(1.1) + '/>' +
     // braço do arco (luva branca), por baixo da manga
     '<path d="M-6 -43L' + q2(G[0], G[1]) + '" stroke="' + CONT + '" stroke-width="5.8" stroke-linecap="round"/>' +
     '<path d="M-6 -43L' + q2(G[0], G[1]) + '" stroke="#fff" stroke-width="4.2" stroke-linecap="round"/>' +
-    // blusinha branca com o meio rosa, lacinho no peito, gargantilha com a Soul Gem
+    // blusinha branca, laçarote no peito e a gargantilha com a Soul Gem
     '<path d="M-3.6 -45C-5 -41 -5 -37 -3.8 -33.8L9.8 -33.8C11 -37 11 -41 9.6 -45Q3 -43 -3.6 -45Z" fill="#fff5fa" ' + ct(1.3) + '/>' +
-    '<path d="M1.2 -43.8L4.8 -43.8L5.4 -34L.6 -34Z" fill="' + COR.rosa + '"/>' +
-    '<path d="M3 -41.4C1 -44.4 -2.6 -44.8 -2.8 -42C-3 -39.6 0 -39.4 3 -41.4C6 -39.4 9 -39.6 8.8 -42C8.6 -44.8 5 -44.4 3 -41.4Z" fill="' + COR.rosaEscuro + '" ' + ct(.9) + '/>' +
-    '<circle cx="3" cy="-41.4" r="1.2" fill="' + COR.rosaEscuro + '" ' + ct(.7) + '/>' +
+    '<path d="M1.4 -38L4.6 -38L5.4 -34L.6 -34Z" fill="' + COR.rosa + '"/>' +
     '<rect x=".8" y="-49" width="4.4" height="4.6" fill="' + pele + '"/>' +
     '<path d="M.2 -46.8Q3 -45.4 5.8 -46.8L5.8 -44.8Q3 -43.4 .2 -44.8Z" fill="url(#mv)" ' + ct(.7) + '/>' +
-    '<ellipse cx="3" cy="-44.2" rx="1.35" ry="1.75" fill="url(#mo)" stroke="' + COR.dourado + '" stroke-width=".6"/>' +
+    '<ellipse cx="3" cy="-44.4" rx="1.35" ry="1.75" fill="url(#mo)" stroke="' + COR.dourado + '" stroke-width=".6"/>' +
+    '<path d="M2.2 -38.8L.4 -34.4L2 -34.8L2.6 -33.2L3.4 -38.4Z M3.8 -38.8L5.6 -34.4L4 -34.8L3.4 -33.2L2.6 -38.4Z" fill="url(#mv)" ' + ct(.7) + '/>' +
+    '<path d="M3 -39.6C.6 -44 -4.6 -44.4 -5 -40.4C-5.4 -36.6 -.8 -36.6 3 -39.6C6.8 -36.6 11.4 -36.6 11 -40.4C10.6 -44.4 5.4 -44 3 -39.6Z" fill="url(#mv)" ' + ct(1) + '/>' +
+    '<path d="M1.6 -40.4C0 -42.4 -2.6 -42.8 -3.4 -41M4.4 -40.4C6 -42.4 8.6 -42.8 9.4 -41" fill="none" stroke="' + COR.vermelhoEscuro + '" stroke-opacity=".55" stroke-width=".8" stroke-linecap="round"/>' +
+    '<ellipse cx="3" cy="-39.6" rx="1.8" ry="1.6" fill="url(#mv)" ' + ct(.8) + '/>' +
     // mangas bufantes
-    '<ellipse cx="-4.4" cy="-42.6" rx="4.6" ry="3.9" fill="url(#mr)" ' + ct(1.2) + '/>' +
-    '<ellipse cx="10.6" cy="-42.6" rx="4.6" ry="3.9" fill="url(#mr)" ' + ct(1.2) + '/>' +
-    '<path d="M-8.6 -40.4Q-4.4 -38 -.2 -40.4M6.4 -40.4Q10.6 -38 14.8 -40.4" fill="none" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/>' +
-    // rosto, bochechas, olhos cor-de-rosa e o sorrisinho
-    '<ellipse cx="4" cy="-62.4" rx="15.4" ry="14.6" fill="' + pele + '" ' + ct(1.5) + '/>' +
-    '<ellipse cx="-6.6" cy="-55.4" rx="2.7" ry="1.4" fill="#ff8fb5" opacity=".6"/>' +
-    '<ellipse cx="14" cy="-55.4" rx="2.7" ry="1.4" fill="#ff8fb5" opacity=".6"/>' +
-    '<ellipse cx="-2.8" cy="-59.6" rx="3.3" ry="4.4" fill="url(#mo)" ' + ct(.9) + '/>' +
-    '<ellipse cx="9.8" cy="-59.6" rx="3.5" ry="4.5" fill="url(#mo)" ' + ct(.9) + '/>' +
-    '<path d="M-6.8 -62.6Q-3 -66.2 .8 -63.2M5.8 -63.2Q9.8 -66.4 13.8 -62.6" fill="none" stroke="' + CONT + '" stroke-width="1.7" stroke-linecap="round"/>' +
-    '<circle cx="-4" cy="-61.2" r="1.3" fill="#fff"/><circle cx="8.6" cy="-61.2" r="1.35" fill="#fff"/>' +
-    '<circle cx="-1.6" cy="-57.6" r=".6" fill="#fff"/><circle cx="11.1" cy="-57.6" r=".6" fill="#fff"/>' +
-    '<path d="M1.4 -53.6Q3.6 -50.6 5.8 -53.6Z" fill="#e0507a" ' + ct(.7) + '/>' +
-    // franja com as pontinhas e as mechas do lado
-    '<path d="M-11.6 -63C-12.6 -73.6 -7 -80.4 4 -80.8C15 -81.2 20.6 -73.6 19.6 -63L17.2 -65.8L15.8 -61.8L12.6 -66.8L10.4 -63.2L7.6 -67.8L4.4 -63L1.6 -67.6L-1.4 -63.4L-3.8 -67.6L-6.8 -63.2L-8.6 -66.8L-10.4 -61.8Z" fill="url(#mc)" ' + ct(1.4) + '/>' +
-    '<path d="M-11.6 -65C-14.2 -58.6 -14.2 -51.6 -11.6 -46.6C-10.6 -50.6 -10.2 -55.6 -10.4 -60.6Z" fill="url(#mc)" ' + ct(1.2) + '/>' +
-    '<path d="M19.6 -65C22.2 -58.6 22.2 -51.6 19.6 -46.6C18.6 -50.6 18.2 -55.6 18.4 -60.6Z" fill="url(#mc)" ' + ct(1.2) + '/>' +
-    '<path d="M-4 -77.6Q3 -80.2 10 -77.8" fill="none" stroke="#fff" stroke-opacity=".6" stroke-width="1.3" stroke-linecap="round"/>' +
-    // laços vermelhos nas marias-chiquinhas
-    laco(-10.2, -69.4, -18) + laco(18.2, -69.4, 18) +
-    // o arco de rosa, a mão e a rosinha
+    '<ellipse cx="-4.4" cy="-42.4" rx="5.4" ry="4.6" fill="url(#mr)" ' + ct(1.2) + '/>' +
+    '<ellipse cx="10.4" cy="-42.4" rx="5.4" ry="4.6" fill="url(#mr)" ' + ct(1.2) + '/>' +
+    '<path d="M-9.4 -39.6Q-4.4 -36.8 .6 -39.6M5.4 -39.6Q10.4 -36.8 15.4 -39.6" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/>' +
+    // rosto: bochechas com risquinhos, olhos de mangá e o sorrisinho
+    '<ellipse cx="4" cy="-61.4" rx="15.2" ry="14.4" fill="' + pele + '" ' + ct(1.5) + '/>' +
+    '<ellipse cx="-6.8" cy="-53.4" rx="3" ry="1.5" fill="#ff8fb5" opacity=".55"/><ellipse cx="14.8" cy="-53.4" rx="3" ry="1.5" fill="#ff8fb5" opacity=".55"/>' +
+    '<path d="M-8.8 -52.6l1.1 -1.8M-7 -52.6l1.1 -1.8M-5.2 -52.6l1.1 -1.8M13 -52.6l1.1 -1.8M14.8 -52.6l1.1 -1.8M16.6 -52.6l1.1 -1.8" stroke="#ff6f9c" stroke-width=".7" stroke-linecap="round"/>' +
+    olho(-2.4, -58.4, -1) + olho(10.4, -58.4, 1) +
+    '<path d="M1.4 -51.4Q3.8 -48.2 6.2 -51.4Z" fill="#e8507c" ' + ct(.7) + '/>' +
+    // franja repicada, as mechas compridas do lado do rosto e o brilho do cabelo
+    '<path d="M-11.8 -63.4C-13 -75.6 -6.6 -82.4 4.2 -82.8C15.2 -83 21.4 -75.6 20 -63.4Q18.4 -65 17.9 -66.8Q17.6 -64.4 16.4 -63.2Q15 -66.2 13.6 -68.6Q12.8 -66 11.2 -64.8Q9.8 -67.6 8.6 -69.8Q7.8 -67 6.2 -65.4Q4.8 -68.2 3.6 -70.4Q2.8 -67.4 1.2 -65.2Q-.2 -67.8 -1.2 -69.8Q-2 -67 -3.8 -64.8Q-5 -67 -6 -69Q-6.8 -66 -8.6 -63.4Q-9.6 -65.6 -10.4 -67.4Q-11 -65.2 -11.8 -63.4Z" fill="url(#mc)" ' + ct(1.4) + '/>' +
+    '<path d="M-6.2 -67.4Q-2.8 -69.6 .6 -68M7.4 -68Q10.8 -69.6 14.2 -67.4" fill="none" stroke="#b8467a" stroke-width="1.1" stroke-linecap="round" opacity=".85"/>' +
+    '<path d="M-9.6 -68C-13.6 -61 -14.6 -52.6 -12.6 -44.2C-11 -49 -10 -54.6 -9.4 -60.2Z" fill="url(#mc)" ' + ct(1.2) + '/>' +
+    '<path d="M17.6 -68C21.6 -61 22.6 -52.6 20.6 -44.2C19 -49 18 -54.6 17.4 -60.2Z" fill="url(#mc)" ' + ct(1.2) + '/>' +
+    '<path d="M-3.6 -78.4Q4 -81 11.6 -78.6" fill="none" stroke="#fff" stroke-opacity=".6" stroke-width="1.3" stroke-linecap="round"/>' +
+    // os laços vermelhos grandões nas marias-chiquinhas
+    laco(-9.4, -80.2, -32) + laco(17.4, -80.2, 32) +
+    // o arco é um galho de roseira, com a rosa na ponta de cima (como na arte da Madoka)
     '<path d="' + arco + '" fill="none" stroke="' + CONT + '" stroke-width="4.4" stroke-linecap="round"/>' +
     '<path d="' + arco + '" fill="none" stroke="url(#ma)" stroke-width="2.8" stroke-linecap="round"/>' +
     '<path d="' + arco + '" fill="none" stroke="#ffe3f1" stroke-opacity=".7" stroke-width=".8" stroke-linecap="round" transform="translate(-.5 -.3)"/>' +
-    '<circle cx="' + f(T1[0]) + '" cy="' + f(T1[1]) + '" r="1.5" fill="' + COR.dourado + '" ' + ct(.8) + '/>' +
     '<circle cx="' + f(T2[0]) + '" cy="' + f(T2[1]) + '" r="1.5" fill="' + COR.dourado + '" ' + ct(.8) + '/>' +
     '<circle cx="' + f(G[0]) + '" cy="' + f(G[1]) + '" r="2.9" fill="#fff" ' + ct(1.2) + '/>' +
-    folhaD(G[0] + N[0] * 5, G[1] + N[1] * 5, 150, 7) +
-    '<g transform="translate(' + q2(G[0] + N[0] * 6, G[1] + N[1] * 6) + ')">' + rosaD(3.6) + '</g>';
+    folhaD(G[0] + N[0] * 10, G[1] + N[1] * 10, 160, 6.5) + folhaD(T1[0] - N[0] * 2, T1[1] - N[1] * 2, -20, 7) +
+    '<g transform="translate(' + q2(T1[0] + N[0] * 1.8, T1[1] + N[1] * 1.8) + ')">' + rosaD(4.6) + '</g>';
   }
 
   // SVG -> canvas, já na resolução em que vai aparecer
@@ -821,18 +839,19 @@ const CONFIG = {
     const dx = Math.max(X - x, 0, x - X - W), dy = Math.max(Y - y, 0, y - Y - H);
     return Math.min(1, Math.hypot(dx, dy) / m);
   };
-  const naFonte = (x, y) => Math.max(0, Math.min(1, Math.min(x - RX, RR - x, y - RY, RB - y) / (16 * k)));   // some antes da borda da fonte
+  const naFonte = (x, y, m) => Math.max(0, Math.min(1, Math.min(x - RX, RR - x, y - RY, RB - y) / ((m || 16) * k)));   // some antes da borda da área desenhada
   function zonaAleatoria() {                            // escolhe uma zona pelo tamanho dela
     const areas = zonasP.map(z => (z.x1 - z.x0) * (z.y1 - z.y0)), tot = areas.reduce((a, b) => a + b, 0);
     let r = Math.random() * tot;
     for (let i = 0; i < zonasP.length; i++) { r -= areas[i]; if (r <= 0) return zonasP[i]; }
     return zonasP[0];
   }
-  function novaPena(i, espalha) {
+  function novaPena(i, espalha) {                       // a pena nasce já dentro do espaço (nunca entra pela beirada, onde ficaria cortada)
     const z = zonaAleatoria(), amp = Math.min(rnd(8, 18) * k, (z.x1 - z.x0) * .3), x0 = rnd(z.x0 + amp, Math.max(z.x0 + amp, z.x1 - amp));
-    return { i, z, x0, x: x0, y: espalha ? rnd(z.y0, z.y1) : z.y0 - rnd(10, 40) * k, fase: rnd(0, 7), freq: rnd(.8, 1.4), amp, vy: rnd(18, 30) * k,
+    const y = espalha ? rnd(z.y0, Math.max(z.y0, z.y1 - 60 * k)) : rnd(z.y0, z.y0 + (z.y1 - z.y0) * .4);
+    return { i, z, x0, x: x0, y, fase: rnd(0, 7), freq: rnd(.8, 1.4), amp, vy: rnd(18, 30) * k,
              deriva: rnd(-4, 4) * k, tam: TAM_PENA * k * rnd(.8, 1.15), cor: i % CORES_PENA.length, rot: rnd(-.4, .4), ix: 0, iy: 0, gira: 0,
-             idade: espalha ? rnd(0, .8) : 0, ang: 0 };
+             idade: espalha ? rnd(0, 2) : 0, ang: 0 };
   }
   // as penas vivem num relógio próprio (tb), que anda VEL vezes o normal
   let tb = 0;
@@ -847,16 +866,20 @@ const CONFIG = {
     p.ang = p.rot + c * .6;                                          // inclina pro lado que está indo
     if (p.x0 < z.x0 + p.amp) p.x0 += (z.x0 + p.amp - p.x0) * Math.min(1, dt * 2);
     if (p.x0 > z.x1 - p.amp) p.x0 -= (p.x0 - z.x1 + p.amp) * Math.min(1, dt * 2);
-    if (p.y > z.y1 + 20 * k || p.y < RY - 220 * k) Object.assign(p, novaPena(p.i, false));
+    if (p.y > z.y1 + 20 * k || naFonte(p.x, p.y, 34) <= 0 && p.idade > 1) {       // chegou no fim (ou o sopro jogou pra fora): nasce de novo, com um brilhinho
+      Object.assign(p, novaPena(p.i, false));
+      faisca(p.x, p.y, rnd(3.5, 5.5) * k, rnd(.45, .7), escolhe(['#fff', COR.rosaClaro]));
+    }
   }
   function desenhaPenas() {
     if (!carimbosPena.length) return;
     for (const p of penas) {
-      const a = Math.min(1, p.idade / .8) * Math.max(0, Math.min(1, (p.z.y1 - p.y) / (40 * k))) * pertoCam(p.x, p.y, 16 * k) * naFonte(p.x, p.y);
+      const nasce = Math.min(1, p.idade / .9), esc = .45 + .55 * suave(nasce);    // aparece crescendo, devagarinho
+      const a = nasce * Math.max(0, Math.min(1, (p.z.y1 - p.y) / (40 * k))) * pertoCam(p.x, p.y, 16 * k) * naFonte(p.x, p.y, 34);
       if (a <= .01) continue;
       ctx.save();
       ctx.globalAlpha = a * .95;
-      ctx.translate(p.x, p.y); ctx.rotate(p.ang); ctx.scale(p.tam, p.tam);
+      ctx.translate(p.x, p.y); ctx.rotate(p.ang); ctx.scale(p.tam * esc, p.tam * esc);
       ctx.drawImage(carimbosPena[p.cor], PENA_VB[0], PENA_VB[1], PENA_VB[2], PENA_VB[3]);
       ctx.restore();
     }
@@ -971,9 +994,9 @@ const CONFIG = {
     ctx.fillStyle = '#fff'; ctx.strokeStyle = CONT; ctx.lineWidth = 1.2;
     ctx.beginPath(); ctx.arc(mao[0], mao[1], 2.9, 0, 7); ctx.fill(); ctx.stroke();
     ctx.fillStyle = '#ff94c4';                          // a manga bufante por cima do ombro
-    ctx.beginPath(); ctx.ellipse(10.6, -42.6, 4.6, 3.9, 0, 0, 7); ctx.fill(); ctx.stroke();
-    ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.5;
-    ctx.beginPath(); ctx.moveTo(6.4, -40.4); ctx.quadraticCurveTo(10.6, -38, 14.8, -40.4); ctx.stroke();
+    ctx.beginPath(); ctx.ellipse(10.4, -42.4, 5.4, 4.6, 0, 0, 7); ctx.fill(); ctx.stroke();
+    ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.6;
+    ctx.beginPath(); ctx.moveTo(5.4, -39.6); ctx.quadraticCurveTo(10.4, -36.8, 15.4, -39.6); ctx.stroke();
     ctx.restore();
     ctx.globalAlpha = 1;
   }
@@ -1002,7 +1025,7 @@ const CONFIG = {
     ctx.fillStyle = gl; ctx.beginPath(); ctx.arc(x, y, r, 0, 7); ctx.fill();
   }
   function estouro(x, y, t) {
-    parts.push({ tipo: 'estouro', x, y, tam: 1, rot: rnd(0, 1), idade: 0, vida: .75 });
+    parts.push({ tipo: 'estouro', x, y, tam: 1, rot: rnd(0, 1), idade: 0, vida: .8, coracao: true });
     for (let i = 0; i < 16; i++) pluma(x, y);
     for (let i = 0; i < 18; i++) petala(x, y, 1);
     for (let i = 0; i < 10; i++) faisca(x + rnd(-30, 30) * k, y + rnd(-26, 26) * k, rnd(4, 8) * k, rnd(.5, 1), escolhe(['#fff', COR.rosaClaro, COR.douradoClaro]));
@@ -1039,6 +1062,14 @@ const CONFIG = {
     for (let i = 0; i < 10; i++) petala(x + rnd(-8, 8) * k, y + rnd(-14, 14) * k, .6);
     for (let i = 0; i < 8; i++) faisca(x + rnd(-24, 24) * k, y + rnd(-30, 30) * k, rnd(3.5, 6) * k, rnd(.4, .8), escolhe(['#fff', COR.rosaClaro, COR.douradoClaro]));
   }
+  function caminhoCoracao(cx, cy, r) {                 // coração centrado em (cx, cy), com uns 2r de largura (o mesmo de dCoracao)
+    const s = r / 14, P = (a, b) => [cx + a * s, cy + (b + 2.5) * s];
+    const c = (a1, b1, a2, b2, a3, b3) => { const p1 = P(a1, b1), p2 = P(a2, b2), p3 = P(a3, b3); ctx.bezierCurveTo(p1[0], p1[1], p2[0], p2[1], p3[0], p3[1]); };
+    ctx.beginPath(); ctx.moveTo(...P(0, 9));
+    c(-9, 3, -14, -2, -14, -6.8); c(-14, -11.6, -10.4, -14, -7, -14); c(-4, -14, -1.6, -12.4, 0, -9.6);
+    c(1.6, -12.4, 4, -14, 7, -14); c(10.4, -14, 14, -11.6, 14, -6.8); c(14, -2, 9, 3, 0, 9);
+    ctx.closePath();
+  }
   function desenhaBrilho(x, y, s, rt) {
     ctx.save(); ctx.translate(x, y); ctx.rotate(rt);
     ctx.beginPath();
@@ -1057,8 +1088,15 @@ const CONFIG = {
         g.addColorStop(0, 'rgba(255,255,255,' + f(.95 * e) + ')'); g.addColorStop(.35, 'rgba(255,160,210,' + f(.6 * e) + ')'); g.addColorStop(1, 'rgba(255,120,190,0)');
         ctx.globalAlpha = 1; ctx.fillStyle = g;
         ctx.beginPath(); ctx.arc(p.x, p.y, R, 0, 7); ctx.fill();
-        ctx.globalAlpha = e; ctx.strokeStyle = '#ffd0e8'; ctx.lineWidth = 3 * s * e + .5;
-        ctx.beginPath(); ctx.arc(p.x, p.y, (12 + 80 * u) * s, 0, 7); ctx.stroke();
+        if (p.coracao) {                                // coração de luz, como na arte da Madoka com o arco
+          ctx.globalAlpha = e; ctx.lineJoin = 'round';
+          caminhoCoracao(p.x, p.y + 4 * s * u, (14 + 66 * u) * s);
+          ctx.strokeStyle = 'rgba(255,120,190,.55)'; ctx.lineWidth = 7 * s * e + 1; ctx.stroke();
+          ctx.strokeStyle = '#ffe0ef'; ctx.lineWidth = 2.6 * s * e + .6; ctx.stroke();
+        } else {
+          ctx.globalAlpha = e; ctx.strokeStyle = '#ffd0e8'; ctx.lineWidth = 3 * s * e + .5;
+          ctx.beginPath(); ctx.arc(p.x, p.y, (12 + 80 * u) * s, 0, 7); ctx.stroke();
+        }
         ctx.strokeStyle = '#fff'; ctx.lineWidth = 2 * s * e + .3; ctx.lineCap = 'round';
         ctx.beginPath();
         for (let j = 0; j < 12; j++) {
@@ -1086,14 +1124,14 @@ const CONFIG = {
       } else if (p.tipo === 'pluma') {                  // pena solta do estouro: sai voando e cai balançando
         p.vx *= 1 - Math.min(1, 2.2 * dt); p.vy = p.vy * (1 - Math.min(1, 2.2 * dt)) + 60 * k * dt;
         p.x += (p.vx + Math.sin(t * 3 + p.fase) * 14 * k) * dt; p.y += p.vy * dt; p.rot += p.vr * dt; p.vr *= 1 - Math.min(1, dt * .8);
-        a *= pertoCam(p.x, p.y, 16 * k);
+        a *= pertoCam(p.x, p.y, 16 * k) * naFonte(p.x, p.y, 34);
         if (a <= 0 || !carimbosPena.length) continue;
         ctx.save(); ctx.globalAlpha = a; ctx.translate(p.x, p.y); ctx.rotate(p.rot + Math.sin(t * 4 + p.fase) * .4); ctx.scale(p.tam, p.tam);
         ctx.drawImage(carimbosPena[p.cor], PENA_VB[0], PENA_VB[1], PENA_VB[2], PENA_VB[3]);
         ctx.restore();
       } else if (p.tipo === 'chuva') {                  // flechinha de luz caindo
         p.x += p.vx * dt; p.y += p.vy * dt;
-        a *= pertoCam(p.x, p.y, 30 * k) * Math.min(1, u * 6);
+        a *= pertoCam(p.x, p.y, 30 * k) * Math.min(1, u * 6) * naFonte(p.x, p.y, 36);
         if (a <= 0) continue;
         const L = 30 * k, n = Math.hypot(p.vx, p.vy), ux = p.vx / n, uy = p.vy / n, g = ctx.createLinearGradient(p.x - ux * L, p.y - uy * L, p.x, p.y);
         g.addColorStop(0, 'rgba(255,140,200,0)'); g.addColorStop(.7, 'rgba(255,150,205,.85)'); g.addColorStop(1, '#fff');
