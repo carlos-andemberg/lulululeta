@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>lulululeta · Moldura da Câmera</title>
+<link href="https://fonts.googleapis.com/css2?family=Cherry+Bomb+One&family=Nunito:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root { --rosa:#ff7eb9; --rosa2:#e2489a; --claro:#ffe3f0; --dourado:#f6c95c; --vermelho:#e3263f; --cont:#3a0f2e; }
+  * { box-sizing:border-box; }
+  body { margin:0; min-height:100vh; display:flex; align-items:center; justify-content:center; padding:32px 16px;
+         font-family:'Nunito','Segoe UI',Arial,sans-serif; color:#fff2f8;
+         background:
+           radial-gradient(1.5px 1.5px at 12% 14%, #fff9 50%, transparent 51%), radial-gradient(1.5px 1.5px at 82% 9%, #fff9 50%, transparent 51%),
+           radial-gradient(1px 1px at 36% 26%, #fff7 50%, transparent 51%), radial-gradient(1px 1px at 91% 36%, #fff7 50%, transparent 51%),
+           radial-gradient(1px 1px at 6% 48%, #fff6 50%, transparent 51%), radial-gradient(1.5px 1.5px at 64% 18%, #fff6 50%, transparent 51%),
+           radial-gradient(ellipse at 50% 0%, rgba(255,126,185,.2), transparent 60%),
+           radial-gradient(ellipse at 50% 30%, #4a1d45 0%, #2c1030 50%, #170818 100%);
+         background-attachment:fixed; }
+  main { width:100%; max-width:760px; }
+  h1 { font-family:'Cherry Bomb One', sans-serif; font-weight:400; font-size:clamp(46px, 12vw, 84px); line-height:1.05; margin:0; text-align:center;
+       color:var(--rosa); background:linear-gradient(#fff, #ffd6ea 45%, var(--rosa)); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;
+       filter:drop-shadow(2px 0 0 var(--cont)) drop-shadow(-2px 0 0 var(--cont)) drop-shadow(0 2px 0 var(--cont)) drop-shadow(0 -2px 0 var(--cont)) drop-shadow(0 5px 0 #b8186a); }
+  p.sub { text-align:center; margin:14px 0 30px; color:rgba(255,242,248,.62); font-weight:600; }
+  .card { padding:24px; border-radius:20px; background:rgba(30,10,32,.86);
+          border:2px solid var(--rosa); box-shadow:0 0 0 3px var(--cont), 0 0 0 5px rgba(246,201,92,.35), 0 14px 40px rgba(0,0,0,.45); margin-bottom:20px; }
+  .card h2 { margin:0 0 6px; font-family:'Cherry Bomb One', sans-serif; font-weight:400; font-size:30px; color:var(--rosa); }
+  .card p { margin:0 0 18px; color:rgba(255,242,248,.76); line-height:1.5; }
+  .fields { display:grid; grid-template-columns:repeat(auto-fit, minmax(150px, 1fr)); gap:14px; margin-bottom:20px; }
+  .field { display:flex; flex-direction:column; gap:6px; min-width:0; }
+  .field > span { font-size:13px; letter-spacing:1.5px; text-transform:uppercase; color:rgba(255,242,248,.52); font-weight:700; }
+  .field.wide { grid-column:span 2; }
+  .field.full { grid-column:1 / -1; }
+  .pair { display:flex; align-items:center; gap:6px; }
+  .pair i { font-style:normal; color:rgba(255,242,248,.4); }
+  input, select { font:inherit; font-size:16px; color:#fff2f8; background:rgba(0,0,0,.35); border:2px solid rgba(255,126,185,.35);
+                  border-radius:10px; padding:7px 10px; width:100%; min-width:0; }
+  input:focus, select:focus { outline:none; border-color:var(--dourado); }
+  input:disabled { opacity:.4; }
+  select option { background:#2c1030; }
+  input[type=range] { padding:0; border:0; background:none; accent-color:var(--rosa); height:38px; }
+  .checks { display:flex; flex-wrap:wrap; gap:10px; }
+  .check { display:flex; align-items:center; gap:8px; padding:7px 12px; border-radius:10px; cursor:pointer;
+           background:rgba(0,0,0,.25); border:2px solid rgba(255,126,185,.3); }
+  .check:has(input:checked) { border-color:var(--rosa); background:rgba(255,126,185,.12); }
+  .check input { width:18px; height:18px; margin:0; accent-color:var(--rosa); }
+  .check span { font-size:16px; color:#fff2f8; font-weight:700; }
+  .field > span output { color:var(--rosa); text-transform:none; letter-spacing:0; }
+  @media (max-width:520px) { .field.wide { grid-column:auto; } }
+  .label { font-size:13px; letter-spacing:1.5px; text-transform:uppercase; color:rgba(255,242,248,.52); font-weight:700; margin-bottom:8px; }
+  .url { display:flex; gap:8px; align-items:stretch; margin-bottom:14px; }
+  .url code { flex:1; min-width:0; overflow-x:auto; white-space:nowrap; font-size:14px; padding:10px 12px; border-radius:10px;
+              background:rgba(0,0,0,.4); border:2px solid rgba(255,126,185,.25); color:var(--claro); }
+  button.act, a.act { font:inherit; font-weight:800; font-size:16px; border:2px solid var(--cont); border-radius:12px; padding:8px 18px; cursor:pointer;
+                      color:var(--cont); background:linear-gradient(#fff, #ffc6e0 50%, var(--rosa)); text-decoration:none;
+                      display:inline-flex; align-items:center; white-space:nowrap; box-shadow:0 3px 0 var(--cont); }
+  button.act:active, a.act:active { transform:translateY(2px); box-shadow:0 1px 0 var(--cont); }
+  a.act.ghost { background:transparent; color:#fff2f8; border-color:rgba(255,126,185,.6); box-shadow:none; }
+  .links { display:flex; gap:8px; flex-wrap:wrap; }
+  .tips { color:rgba(255,242,248,.66); font-size:15px; line-height:1.7; margin:0; }
+  .tips b { color:var(--rosa); font-weight:700; }
+  .live { position:relative; width:100%; aspect-ratio:16 / 9; border-radius:12px; overflow:hidden; background:#000; margin-bottom:12px; }
+  .live:empty { display:none; }
+  .live iframe { position:absolute; inset:0; width:100%; height:100%; border:0; }
+  .live iframe.moldura { pointer-events:none; }
+  .modelos { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:16px; }
+  @media (max-width:520px) { .modelos { grid-template-columns:1fr; } }
+  .modelo { font:inherit; text-align:left; padding:12px 14px; border-radius:14px; cursor:pointer; color:#fff2f8;
+            background:rgba(0,0,0,.25); border:2px solid rgba(255,126,185,.3); }
+  .modelo b { display:block; font-size:17px; font-weight:800; }
+  .modelo span { font-size:14px; color:rgba(255,242,248,.64); }
+  .modelo[aria-pressed="true"] { border-color:var(--rosa); background:rgba(255,126,185,.14); }
+  .modelo[aria-pressed="true"] b { color:var(--rosa); }
+  .info { margin:0 0 18px; padding:12px 14px; border-radius:12px; background:rgba(255,126,185,.1); border:2px dashed rgba(246,201,92,.4);
+          color:rgba(255,242,248,.86); line-height:1.6; }
+  .info b { color:var(--dourado); }
+  .info:empty, [hidden] { display:none !important; }
+</style>
+</head>
+<body>
+<main>
+  <h1>lulululeta</h1>
+  <p class="sub">moldura da câmera · fonte Navegador do OBS 🎀💗</p>
+
+  <section class="card">
+    <h2>Moldura de Madoka</h2>
+    <p>Borda rosa com filete dourado e rendinha branca. No canto fica a Soul Gem da Madoka num círculo mágico girando, com o laço vermelho do cabelo dela. Da gema desce a fita com o nome, uma letra embaixo da outra. O Kyubey fica sentado lá embaixo e oferece contrato de vez em quando, com penas cor-de-rosa caindo. De tempos em tempos a Madoka aparece no ar e solta uma flecha de luz, que estoura numa chuva de flechinhas e penas.</p>
+
+    <div class="modelos">
+      <button class="modelo" data-modelo="lol" aria-pressed="true"><b>🎮 Tela do LoL</b><span>câmera no canto de baixo-direito, embaixo dos retratos dos aliados</span></button>
+      <button class="modelo" data-modelo="solta" aria-pressed="false"><b>🎥 Só a câmera</b><span>borda em volta toda, agrupa com a webcam e arrasta junto</span></button>
+    </div>
+    <p class="info" id="info"></p>
+
+    <div class="fields">
+      <label class="field"><span>Nome</span><input type="text" id="nome" value="lulululeta" maxlength="24"></label>
+      <label class="field" id="campoTela"><span>Tela do OBS</span>
+        <select id="resolucao">
+          <option value="1920x1080">1920 × 1080</option>
+          <option value="1280x720">1280 × 720</option>
+        </select>
+      </label>
+      <div class="field wide" id="campoPos"><span>Posição da câmera (x, y)</span>
+        <div class="pair">
+          <input type="number" id="x" min="0" max="3840" aria-label="Posição x">
+          <i>,</i>
+          <input type="number" id="y" min="0" max="2160" aria-label="Posição y">
+        </div>
+      </div>
+      <div class="field wide"><span>Tamanho da câmera</span>
+        <div class="pair">
+          <input type="number" id="largura" min="60" max="3840" aria-label="Largura">
+          <i>×</i>
+          <input type="number" id="altura" min="34" max="2160" aria-label="Altura">
+        </div>
+      </div>
+      <div class="field full"><span>Enfeites</span>
+        <div class="checks">
+          <label class="check"><input type="checkbox" id="gema" checked><span>💗 Soul Gem</span></label>
+          <label class="check"><input type="checkbox" id="laco" checked><span>🎀 Laço</span></label>
+          <label class="check"><input type="checkbox" id="kyubey" checked><span>🐱 Kyubey</span></label>
+          <label class="check"><input type="checkbox" id="rosas" checked><span>🌹 Rosinhas</span></label>
+          <label class="check"><input type="checkbox" id="temPenas" checked><span>🕊️ Penas</span></label>
+          <label class="check"><input type="checkbox" id="madoka" checked><span>🏹 Madoka na flecha</span></label>
+          <label class="check"><input type="checkbox" id="temFalas" checked><span>💬 Falas do Kyubey</span></label>
+        </div>
+      </div>
+      <label class="field"><span>Quantas penas</span><input type="number" id="penas" value="8" min="1" max="300"></label>
+      <label class="field"><span>Velocidade · <output id="velTxt"></output></span><input type="range" id="velocidade" value="1" min="0.2" max="2" step="0.1" title="1× é o padrão · 2× é rápido · 0,5× é bem devagar"></label>
+      <label class="field"><span>Flecha a cada (s)</span><input type="number" id="flecha" value="30" min="0" max="3600" step="1"></label>
+      <label class="field full"><span>Falas do Kyubey (separe com vírgula)</span><input type="text" id="falas"></label>
+    </div>
+
+    <div class="label">Link pro OBS</div>
+    <div class="url"><code id="url"></code><button class="act" id="copy">Copiar</button></div>
+    <div class="links">
+      <a class="act ghost" id="preview" target="_blank" rel="noopener">Prévia</a>
+      <a class="act ghost" id="zoom" target="_blank" rel="noopener">De pertinho</a>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Em cima da live</h2>
+    <p>A live da lulululeta com a moldura da tela do LoL por cima, pra conferir o encaixe.</p>
+    <div class="live" id="live"></div>
+    <a class="act ghost" id="verLive" href="#">Mostrar a live</a>
+  </section>
+
+  <p class="tips">
+    <b>Tela do LoL no OBS:</b> Fontes → + → Navegador → cole o link. Largura e altura = tamanho da tela do OBS (1920 × 1080). Deixe a moldura acima da câmera.<br>
+    <b>Só a câmera no OBS:</b> Fontes → + → Navegador → cole o link, com o tamanho que aparece na caixinha. Encaixe a câmera no buraco da moldura, selecione as duas → botão direito → Agrupar itens selecionados. Daí é só arrastar e redimensionar o grupo.<br>
+    <b>Mudou a câmera de lugar?</b> Botão direito na câmera → Transformar → Editar transformação: copie a posição e o tamanho pros campos acima. O tamanho da tela fica em Configurações → Vídeo → Resolução base.<br>
+    <b>Enfeites:</b> desmarque o que não quiser. <b>Nome vazio</b> esconde a fita. <b>Flecha 0</b> desliga a flecha. Na prévia, clique pra soltar a flecha.
+  </p>
+</main>
+
+<script>
+  const $ = id => document.getElementById(id);
+  // a tela da live, medida da transmissão (a mesma tabela do CONFIG de moldura-camera.html), numa tela 1920 x 1080
+  const TELAS = { lol: { x: 1599, y: 781, largura: 321, altura: 299 } };
+  const SOLTA = { largura: 321, altura: 299 };
+  const FALAS = ['／人◕ ‿‿ ◕人＼', 'Faça um contrato comigo!', 'Vire uma garota mágica!', 'Qual é o seu desejo?', 'Qualquer desejo mesmo!',
+                 'Só um contratinho...', 'É só assinar aqui', 'Não entendo os humanos'];
+  const PADRAO = { nome: 'lulululeta', resolucao: '1920x1080', penas: 8, velocidade: 1, flecha: 30, falas: FALAS.join(', ') };
+  const campos = ['x', 'y', 'largura', 'altura'];
+  let resolucao = PADRAO.resolucao, modelo = 'lol';
+  $('falas').value = PADRAO.falas;
+
+  const escala = r => parseInt(r) / 1920;
+  const camPadrao = (m, r) => {
+    const c = m === 'solta' ? SOLTA : TELAS[m], e = m === 'solta' ? 1 : escala(r);
+    return Object.fromEntries(Object.entries(c).map(([k, v]) => [k, Math.round(v * e)]));
+  };
+  const n = id => { const v = parseFloat($(id).value); return Number.isFinite(v) ? v : null; };
+  const preenche = () => { const c = camPadrao(modelo, resolucao); for (const k of campos) $(k).value = c[k] ?? ''; };
+  const lista = s => s.split(',').map(x => x.trim()).filter(Boolean).join(',');
+
+  // trocou a resolução: campos que ainda estão no padrão acompanham
+  $('resolucao').onchange = () => {
+    const antes = camPadrao(modelo, resolucao), depois = camPadrao(modelo, $('resolucao').value);
+    for (const c of campos) if (n(c) === antes[c]) $(c).value = depois[c];
+    resolucao = $('resolucao').value;
+    build();
+  };
+
+  // trocou de modelo: a câmera volta pro lugar daquele modelo
+  for (const b of document.querySelectorAll('.modelo')) b.onclick = () => {
+    modelo = b.dataset.modelo;
+    for (const o of document.querySelectorAll('.modelo')) o.setAttribute('aria-pressed', o === b);
+    preenche();
+    build();
+  };
+
+  // modelo solto: a fonte é a câmera + margem pros enfeites (a mesma conta de moldura-camera.html)
+  function fonteSolta(w, h) {
+    const k = Math.min(2.4, Math.max(.4, Math.sqrt(w * h / 92000))), esq = Math.round(110 * k), cima = Math.round(215 * k);
+    return { esq, cima, w: Math.round(esq + w + 110 * k), h: Math.round(cima + h + 70 * k) };
+  }
+
+  // o link leva o modelo e o que for diferente do padrão
+  function params(m) {
+    const solta = m === 'solta', p = [solta ? 'solta' : 'tela=' + m], cam = camPadrao(m, resolucao);
+    if (!solta && resolucao !== PADRAO.resolucao) p.push('resolucao=' + resolucao);
+    for (const c of solta ? ['largura', 'altura'] : campos) {
+      const v = n(c); if (v !== null && Math.abs(v - cam[c]) >= 1) p.push(c + '=' + Math.round(v));
+    }
+    const nome = $('nome').value.trim();
+    if (nome !== PADRAO.nome) p.push('nome=' + encodeURIComponent(nome));
+    for (const id of ['gema', 'laco', 'kyubey', 'rosas', 'madoka']) if (!$(id).checked) p.push(id + '=0');
+    if (!$('temPenas').checked) p.push('penas=0');
+    else {
+      const pe = n('penas');
+      if (pe !== null && pe !== PADRAO.penas) p.push('penas=' + Math.max(0, Math.min(300, Math.round(pe))));
+      const vel = n('velocidade');
+      if (vel !== null && Math.abs(vel - PADRAO.velocidade) > .01) p.push('velocidade=' + vel);
+    }
+    const fl = n('flecha');
+    if (fl !== null && fl !== PADRAO.flecha) p.push('flecha=' + Math.max(0, fl));
+    if (!$('temFalas').checked) p.push('falas=0');
+    else if (lista($('falas').value) !== lista(PADRAO.falas) && lista($('falas').value)) p.push('falas=' + encodeURIComponent(lista($('falas').value)));
+    return p;
+  }
+
+  function build() {
+    $('velTxt').textContent = String(n('velocidade')).replace('.', ',') + '×';
+    $('penas').disabled = $('velocidade').disabled = !$('temPenas').checked;
+    $('falas').disabled = !$('temFalas').checked;
+    const link = p => { const u = new URL('moldura-camera.html', location.href); u.search = '?' + p.join('&'); return u.href; };
+    const solta = modelo === 'solta', p = params(modelo), url = link(p);
+    $('url').textContent = url;
+    $('preview').href = url;
+    $('zoom').href = url + '&zoom';
+    $('zoom').hidden = solta;
+    $('campoPos').hidden = solta;
+    $('campoTela').hidden = solta;
+    if (solta) {
+      const w = n('largura') || SOLTA.largura, h = n('altura') || SOLTA.altura, f = fonteSolta(w, h);
+      $('info').innerHTML = 'No OBS: fonte Navegador com <b>' + f.w + ' × ' + f.h + '</b>. A câmera fica ' + f.esq + ' px da esquerda e ' + f.cima + ' px do topo da fonte. ' +
+        'Encaixe a webcam no buraco e agrupe as duas (botão direito → Agrupar itens selecionados) pra arrastar e redimensionar juntas.';
+    } else {
+      $('info').innerHTML = 'No OBS: fonte Navegador com <b>' + resolucao.replace('x', ' × ') + '</b> (a tela toda). A moldura cai sozinha em volta da câmera, em ' + (n('x') ?? '') + ', ' + (n('y') ?? '') + '.';
+    }
+    const m = document.querySelector('#live .moldura');           // na live vai a moldura de tela inteira (no solto, a do LoL)
+    if (m) {
+      let pt = params(solta ? 'lol' : modelo);
+      if (solta) pt = pt.filter(x => !/^(x|y|largura|altura)=/.test(x));
+      m.src = link(pt) + '&semfundo';
+    }
+  }
+  for (const id of ['nome', 'x', 'y', 'largura', 'altura', 'gema', 'laco', 'kyubey', 'rosas', 'temPenas', 'madoka', 'temFalas', 'penas', 'velocidade', 'flecha', 'falas']) {
+    $(id).addEventListener('input', build); $(id).addEventListener('change', build);
+  }
+
+  // a live só carrega quando pedir (o player da Twitch é pesado)
+  $('verLive').onclick = e => {
+    e.preventDefault();
+    const box = $('live');
+    if (box.firstChild) { box.innerHTML = ''; e.target.textContent = 'Mostrar a live'; return; }
+    const player = document.createElement('iframe');
+    player.allow = 'autoplay; fullscreen';
+    player.src = 'https://player.twitch.tv/?channel=lulululeta&muted=true&autoplay=true&parent=' + encodeURIComponent(location.hostname);
+    const moldura = document.createElement('iframe');
+    moldura.className = 'moldura';
+    box.append(player, moldura);
+    e.target.textContent = 'Esconder a live';
+    build();
+  };
+
+  $('copy').onclick = async e => {
+    try { await navigator.clipboard.writeText($('url').textContent); e.target.textContent = 'Copiado!'; }
+    catch { e.target.textContent = 'Selecione e copie'; }
+    setTimeout(() => e.target.textContent = 'Copiar', 1500);
+  };
+  preenche();
+  build();
+</script>
+</body>
+</html>

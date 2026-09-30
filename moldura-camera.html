@@ -1,0 +1,1258 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>lulululeta · Moldura da Câmera</title>
+<link href="https://fonts.googleapis.com/css2?family=Cherry+Bomb+One&display=swap" rel="stylesheet">
+<!--
+  ================================================================
+   LULULULETA · MOLDURA DA CÂMERA  -  fonte "Navegador" do OBS
+  ================================================================
+   Moldura de Madoka, toda rosa: borda rosa com filete dourado e
+   rendinha branca por dentro, a Soul Gem da Madoka no canto, em
+   cima de um círculo mágico girando, com o laço vermelho do cabelo
+   dela amarrado ali. Da gema desce uma fita com o nome, uma letra
+   embaixo da outra. O Kyubey fica sentado lá embaixo, perto das
+   rosinhas, e penas cor-de-rosa caem devagar.
+
+   De tempos em tempos tem FLECHA: a Madoka aparece no ar, em cima
+   de um circulinho mágico, puxa o arco de rosa e solta uma flecha
+   de luz, que estoura no alto numa chuva de flechinhas e penas. A
+   Soul Gem acende, o círculo gira, a fita pula e o Kyubey fecha o
+   contrato. E de vez em quando ele solta um balãozinho oferecendo
+   um contrato.
+
+   DOIS MODELOS
+     ?tela=lol   a tela do LoL: câmera no canto de baixo-direito,
+                 encostada nas beiradas (o padrão). A fonte cobre a
+                 tela toda.
+     ?solta      só a câmera, com borda em volta toda: a fonte é a
+                 câmera + uma margem pros enfeites. Agrupe com a
+                 webcam no OBS e mova as duas juntas.
+
+   COMO COLOCAR NO OBS (tela do LoL)
+     1. Fontes -> + -> Navegador
+     2. URL: o link desta página, ex.: ?tela=lol
+     3. Largura e altura = tamanho da tela do OBS (1920 x 1080).
+        A moldura cai sozinha em volta da câmera.
+     4. Deixe a moldura ACIMA da câmera na lista de fontes.
+
+   OPÇÕES NO LINK (junte com &)
+     ?tela=lol                 a tela do LoL (o padrão)
+     ?solta                    modelo só da câmera (usa só largura/altura)
+     ?x=1599&y=781             canto de cima-esquerdo da câmera, em pixels da tela
+     ?largura=321&altura=299   tamanho da câmera
+     ?resolucao=1280x720       tamanho da tela do OBS, se não for 1920x1080
+     ?nome=Lulu                texto da fita (?nome= esconde)
+     ?penas=12                 quantas penas caindo (0 a 300; 0 = sem penas)
+     ?velocidade=0.6           velocidade das penas (1 = o padrão, 2 = rápido)
+     ?flecha=45                segundos entre uma flecha e outra (0 = desliga)
+     ?madoka=0                 flecha sem a Madoka (sai da Soul Gem)
+     ?kyubey=0                 sem o Kyubey
+     ?gema=0                   sem a Soul Gem (e o círculo mágico)
+     ?laco=0                   sem o laço vermelho
+     ?rosas=0                  sem as rosinhas e o coração
+     ?falas=0                  sem os balõezinhos do Kyubey
+     ?falas=Oi,Tudo bem?       troca as falas (separe com vírgula)
+     ?zoom                     só na prévia: mostra a moldura de pertinho
+
+   Abrindo no navegador aparece um fundo de exemplo, com o HUD do
+   LoL de mentirinha no lugar (clique em qualquer lugar pra soltar
+   a flecha). Dentro do OBS o fundo fica transparente.
+  ================================================================
+-->
+<script>
+const CONFIG = {
+  nome: "lulululeta",            // texto da fita que desce do canto, uma letra embaixo da outra ("" = esconde)  ·  link: ?nome=Lulu
+  fonte: "Cherry Bomb One",      // letra do nome e dos balões (Google Fonts, no <link> lá em cima)
+
+  tela: { largura: 1920, altura: 1080 },   // tela do OBS em que as medidas abaixo valem
+  telas: {                                 // medida da live: câmera no canto de baixo-direito, encostada nas beiradas  ·  link: ?tela=lol
+    lol: { cam: { x: 1599, y: 781, largura: 321, altura: 299 } },
+  },
+  telaPadrao: "lol",
+  solta: { largura: 321, altura: 299 },    // câmera padrão do modelo solto  ·  link: ?solta&largura=&altura=
+
+  penas: 8,                      // quantas penas caindo  ·  link: ?penas=12
+  velocidade: 1,                 // velocidade delas: 2 = rápido, 0.5 = bem devagar  ·  link: ?velocidade=0.6
+  flecha: 30,                    // segundos entre uma flecha e outra, 0 = desliga  ·  link: ?flecha=45
+  madoka: true,                  // na flecha, a Madoka aparece no ar com o arco  ·  link: ?madoka=0
+  kyubey: true,                  // o Kyubey sentado lá embaixo, do lado de fora (no solto, em cima da borda)  ·  link: ?kyubey=0
+  gema: true,                    // a Soul Gem no canto, com o círculo mágico  ·  link: ?gema=0
+  laco: true,                    // o laço vermelho amarrado no canto  ·  link: ?laco=0
+  rosas: true,                   // rosinhas e coração na borda  ·  link: ?rosas=0
+  falas: ["／人◕ ‿‿ ◕人＼", "Faça um contrato comigo!", "Vire uma garota mágica!", "Qual é o seu desejo?", "Qualquer desejo mesmo!",
+          "Só um contratinho...", "É só assinar aqui", "Não entendo os humanos"],
+  falaFlecha: "Contrato fechado!", // o que o Kyubey fala quando a flecha estoura
+  falasCada: 16,                 // segundos entre um balãozinho e outro  ·  link: ?falas=0 desliga
+
+  borda: 13,                     // grossura da borda (numa câmera de 400 de largura; cresce junto com ela)
+  raio: 10,                      // cantos arredondados (a câmera dela tem canto reto)
+
+  cores: {
+    rosa: "#ff7eb9", rosaClaro: "#ffc6e0", rosaEscuro: "#e2489a", magenta: "#b8186a",
+    dourado: "#f6c95c", douradoClaro: "#fff2bd", douradoEscuro: "#c98e22",
+    vermelho: "#e3263f", vermelhoEscuro: "#9e1229",   // o laço do cabelo da Madoka
+    contorno: "#3a0f2e",         // vinho quase preto dos contornos
+  },
+
+  fundoDemo: "auto",             // "auto" = fundo de exemplo só fora do OBS · true / false força
+};
+</script>
+
+<style>
+  * { box-sizing:border-box; }
+  html, body { margin:0; padding:0; width:100%; height:100%; overflow:hidden; background:transparent; }
+  body.demo { background:#0b1420; cursor:pointer; }
+
+  .palco { position:absolute; left:0; top:0; transform-origin:0 0; overflow:hidden; }
+  .palco > svg, .palco > canvas { position:absolute; display:block; overflow:visible; }
+
+  /* ---------- prévia (só fora do OBS) ---------- */
+  .demo-only { display:none; }
+  body.demo .palco {
+    background:
+      radial-gradient(ellipse at 62% 38%, rgba(190,225,255,.22), transparent 55%),
+      repeating-linear-gradient(135deg, rgba(255,255,255,.035) 0 90px, rgba(0,0,0,.05) 90px 180px),
+      linear-gradient(160deg, #3b5f86 0%, #253f60 45%, #142438 100%);
+  }
+  body.demo.solta .palco { background:linear-gradient(160deg, #3a2440, #221629); }
+  body.demo .demo-only { display:flex; }
+  .cam-box {
+    position:absolute; align-items:center; justify-content:center; overflow:hidden;
+    background:repeating-linear-gradient(135deg, rgba(255,255,255,.06) 0 14px, transparent 14px 28px), linear-gradient(160deg, #8a6b52, #4e3b4c);
+    color:rgba(255,220,238,.6); font:700 26px 'Segoe UI', Arial, sans-serif; letter-spacing:3px; text-transform:uppercase;
+  }
+  .hud { position:absolute; background:rgba(8,14,22,.55); border:2px solid rgba(200,170,110,.45); border-radius:6px;
+         align-items:center; justify-content:center; text-align:center;
+         color:rgba(255,255,255,.72); font:600 calc(18px * var(--s, 1)) 'Segoe UI', Arial, sans-serif; padding:4px; }
+  .hud.meta { background:linear-gradient(90deg, #ef2fd0 49%, #fff 49%); border:0; border-radius:2px; color:#f28ad8; font:800 calc(26px * var(--s, 1)) 'Segoe UI', Arial, sans-serif; }
+  .hud.texto { background:none; border:0; color:#fff; font:800 calc(26px * var(--s, 1)) 'Segoe UI', Arial, sans-serif; text-shadow:0 2px 3px #000; }
+  .hud.retrato { border-radius:50%; background:radial-gradient(circle at 50% 40%, #6b7ea8, #22304a); border:3px solid #b99a5b; }
+  .hud.barra { border-radius:2px; background:linear-gradient(#2fcf5a 0 55%, #3aa0e8 55%); border:2px solid #b99a5b; padding:0; }
+  .dica { position:absolute; left:600px; top:170px; flex-direction:column; gap:10px;
+          color:rgba(255,255,255,.7); font:600 calc(28px * var(--s, 1)) 'Segoe UI', Arial, sans-serif; }
+  .dica b { color:#ff9ccf; font:400 calc(42px * var(--s, 1)) 'Cherry Bomb One', 'Segoe UI', sans-serif; }
+  .dica.fixa { position:fixed; left:16px; top:12px; gap:2px; font-size:15px; z-index:5; }
+  .dica.fixa b { font-size:22px; }
+
+  /* ---------- enfeites (SVG) ---------- */
+  .pop, .placa, .balao, .circulo { transform-box:fill-box; transform-origin:50% 50%; }
+  .balao { transform-origin:50% 100%; }
+  .pisca   { transform-box:fill-box; transform-origin:50% 50%; opacity:0; animation:pisca var(--t) ease-in-out var(--d) infinite; }
+  .cintila { transform-box:fill-box; transform-origin:50% 50%; animation:cintila var(--t) ease-in-out var(--d) infinite; }
+  .brilho-borda { animation:corre var(--t) linear infinite; }
+  .reflexo-v { transform-box:fill-box; transform-origin:50% 50%; animation:reflexo-v 6s ease-in-out 1s infinite; }
+
+  /* Soul Gem e o círculo mágico */
+  .gira { transform-box:fill-box; transform-origin:50% 50%; animation:gira 48s linear infinite; }
+  .gira-contra { transform-box:fill-box; transform-origin:50% 50%; animation:gira 32s linear infinite reverse; }
+  .aura { transform-box:fill-box; transform-origin:50% 50%; animation:aura 2.4s ease-in-out infinite alternate; }
+  .evento .aura { animation-duration:.3s; }
+
+  /* laço: as pontas balançam */
+  .cauda-d { transform-box:fill-box; transform-origin:0% 50%; animation:balanca 3.2s ease-in-out infinite alternate; }
+  .cauda-b { transform-box:fill-box; transform-origin:50% 0%; animation:balanca2 3.8s ease-in-out .7s infinite alternate; }
+
+  /* Kyubey */
+  .kb-olhos  { transform-box:fill-box; transform-origin:50% 50%; animation:olho 5.4s linear infinite; }
+  .kb-fio-e  { transform-box:fill-box; transform-origin:30% 0%; animation:fio 3.4s ease-in-out infinite alternate; }
+  .kb-fio-d  { transform-box:fill-box; transform-origin:70% 0%; animation:fio2 3.9s ease-in-out .6s infinite alternate; }
+  .kb-rabo   { transform-box:fill-box; transform-origin:0% 100%; animation:rabo 2.6s ease-in-out infinite alternate; }
+  .kb-cabeca { transform-box:fill-box; transform-origin:50% 90%; animation:inclina 8s ease-in-out infinite; }
+  .fala .kb-cabeca { animation:fala .22s ease-out 4; }
+
+  /* rosinhas */
+  .balanco { transform-box:fill-box; transform-origin:50% 100%; animation:balanco var(--t) ease-in-out var(--d) infinite alternate; }
+
+  @keyframes corre    { from { stroke-dashoffset:var(--de) } to { stroke-dashoffset:var(--ate) } }
+  @keyframes reflexo-v { 0% { transform:translateY(0) skewY(-20deg) } 40%, 100% { transform:translateY(var(--dist)) skewY(-20deg) } }
+  @keyframes pisca    { 0%, 100% { opacity:0; transform:scale(.2) rotate(0deg) } 50% { opacity:1; transform:scale(1) rotate(45deg) } }
+  @keyframes cintila  { 0%, 100% { transform:scale(.86) rotate(0deg) } 50% { transform:scale(1.12) rotate(14deg) } }
+  @keyframes gira     { to { transform:rotate(360deg) } }
+  @keyframes aura     { from { opacity:.45; transform:scale(.88) } to { opacity:1; transform:scale(1.1) } }
+  @keyframes balanca  { from { transform:rotate(-2.5deg) } to { transform:rotate(3deg) } }
+  @keyframes balanca2 { from { transform:rotate(3deg) } to { transform:rotate(-2.5deg) } }
+  @keyframes olho     { 0%, 93%, 100% { transform:scaleY(1) } 96% { transform:scaleY(.1) } }
+  @keyframes fio      { from { transform:rotate(-5deg) } to { transform:rotate(6deg) } }
+  @keyframes fio2     { from { transform:rotate(5deg) } to { transform:rotate(-6deg) } }
+  @keyframes rabo     { from { transform:rotate(-7deg) } to { transform:rotate(9deg) } }
+  @keyframes inclina  { 0%, 60%, 100% { transform:rotate(0) } 66%, 82% { transform:rotate(-9deg) } }
+  @keyframes fala     { 0%, 100% { transform:rotate(0) translateY(0) } 45% { transform:rotate(-5deg) translateY(-1.5px) } }
+  @keyframes balanco  { from { transform:rotate(calc(var(--a) * -1)) } to { transform:rotate(var(--a)) } }
+</style>
+</head>
+<body>
+
+<div class="palco">
+  <div class="demo-only dica"></div>
+  <div class="demo-only cam-box">câmera</div>
+  <svg class="cena" xmlns="http://www.w3.org/2000/svg"></svg>
+  <canvas></canvas>
+  <svg class="topo" xmlns="http://www.w3.org/2000/svg"></svg>
+</div>
+
+<script>
+(function () {
+  'use strict';
+  const C = CONFIG, COR = C.cores, CONT = COR.contorno;
+  const q = new URLSearchParams(location.search);
+  const rnd = (a, b) => a + Math.random() * (b - a);
+  const escolhe = arr => arr[Math.floor(Math.random() * arr.length)];
+  const f = n => Math.round(n * 100) / 100;
+  const num = (key, def, min, max) => {
+    const v = parseFloat(q.get(key));
+    return Number.isFinite(v) ? Math.min(max, Math.max(min, v)) : def;
+  };
+  const NAO = /^(0|nao|não|false|off)$/i;
+  const liga = (key, def) => q.has(key) ? !NAO.test(q.get(key)) : def;   // ?kyubey=0 desliga
+
+  // ---------- modelo, tela e câmera (em pixels da tela do OBS) ----------
+  // ?tela=lol: a fonte cobre a tela toda e a moldura cai no lugar da câmera
+  // ?solta: só a câmera, com borda em volta toda; a fonte é a câmera + margem pros enfeites
+  const SOLTA = q.has('solta') || q.get('tela') === 'solta';
+  const TELA = C.telas[q.get('tela')] ? q.get('tela') : C.telaPadrao;
+  let SW = C.tela.largura, SH = C.tela.altura, X, Y, W, H;
+  if (SOLTA) {
+    W = num('largura', C.solta.largura, 60, 3840); H = num('altura', C.solta.altura, 34, 2160);
+  } else {
+    const rq = (q.get('resolucao') || '').match(/^(\d{3,4})(?:\s*[x×*]\s*(\d{3,4}))?$/i);
+    if (rq) { SW = +rq[1]; SH = rq[2] ? +rq[2] : Math.round(SW * 9 / 16); }
+    const esc = SW / C.tela.largura, cam = C.telas[TELA].cam;   // ?resolucao=1280x720 sem x/y: as medidas encolhem junto
+    X = num('x', cam.x * esc, 0, SW - 60); Y = num('y', cam.y * esc, 0, SH - 40);
+    W = num('largura', cam.largura * esc, 60, SW - X); H = num('altura', cam.altura * esc, 34, SH - Y + 40);
+  }
+  const k = Math.min(2.4, Math.max(.4, Math.sqrt(W * H / 92000)));   // tamanho dos enfeites acompanha a área da câmera (a dela é quase quadrada)
+  if (SOLTA) {                                          // margem em volta: 110 dos lados, 215 em cima (fita, Kyubey e flecha), 70 embaixo (numa câmera de 400)
+    X = Math.round(110 * k); Y = Math.round(215 * k);
+    SW = Math.round(X + W + 110 * k); SH = Math.round(Y + H + 70 * k);
+  }
+  const NOME = (q.has('nome') ? q.get('nome') : C.nome).trim().slice(0, 24);
+  const NP = Math.round(num('penas', C.penas, 0, 300));
+  const VEL = num('velocidade', C.velocidade, .1, 3);
+  const FLECHA = num('flecha', C.flecha, 0, 3600);
+  const MADOKA = liga('madoka', C.madoka), KYUBEY = liga('kyubey', C.kyubey), GEMA = liga('gema', C.gema);
+  const LACO = liga('laco', C.laco), ROSAS = liga('rosas', C.rosas);
+  let FALAS = C.falas.slice();
+  if (q.has('falas')) {                                 // ?falas=0 desliga · ?falas=Oi,Tudo bem? troca a lista
+    const g = q.get('falas').trim();
+    if (NAO.test(g)) FALAS = [];
+    else if (g && !/^(1|sim|true|on)$/i.test(g)) FALAS = g.split(',').map(s => s.trim().slice(0, 30)).filter(Boolean).slice(0, 40);
+  }
+  const B = C.borda * k, CW = 3.2 * k;                  // grossura da borda e do contorno
+  const ins = B / 2 + CW / 2;                           // linha do meio da borda, por dentro da câmera
+  const RAIO = Math.max(2, C.raio * k);                 // raio do canto, por fora
+  // lados encostados na beirada da tela ficam sem borda (a moldura continua pra fora)
+  const abre = SOLTA ? {} : { cima: Y <= 2, esq: X <= 2, dir: X + W >= SW - 2, baixo: Y + H >= SH - 2 };
+
+  // área que o desenho ocupa (o resto da tela fica vazio): quanto passa da câmera pra cada lado
+  let RX = 0, RY = 0, RR = SW, RB = SH;
+  if (!SOLTA) {
+    const m = [400, 280, 40, 30];                       // esquerda (fita, penas e a flecha), cima, direita, embaixo
+    RX = Math.max(0, X - m[0] * k); RY = Math.max(0, Y - m[1] * k);
+    RR = Math.min(SW, X + W + m[2] * k); RB = Math.min(SH, Y + H + m[3] * k);
+  }
+  const RW = RR - RX, RH = RB - RY;
+  // na tela do LoL, em cima da câmera ficam os retratos dos aliados: dali pra direita nada sobe além da borda
+  const LIM_DIR = SOLTA ? RR : X + 40 * k;
+
+  const palco = document.querySelector('.palco');
+  const cena = document.querySelector('.cena'), topo = document.querySelector('.topo');   // os balões ficam por cima das penas
+  const canvas = document.querySelector('canvas'), ctx = canvas.getContext('2d');
+  const medidor = document.createElement('canvas').getContext('2d');
+  palco.style.width = SW + 'px'; palco.style.height = SH + 'px';
+  palco.style.setProperty('--s', SOLTA ? 1 : SW / 1920);   // o HUD de mentirinha da prévia acompanha a tela
+  for (const el of [cena, canvas, topo]) el.style.cssText = 'left:' + RX + 'px;top:' + RY + 'px;width:' + RW + 'px;height:' + RH + 'px';
+  for (const el of [cena, topo]) el.setAttribute('viewBox', RX + ' ' + RY + ' ' + RW + ' ' + RH);
+
+  // fundo de exemplo só fora do OBS (o OBS injeta window.obsstudio na página)
+  let demo = C.fundoDemo === true || (C.fundoDemo === 'auto' && !window.obsstudio);
+  if (q.has('preview')) demo = true;
+  if (q.has('semfundo')) demo = false;
+  if (demo) document.body.classList.add('demo');
+  if (SOLTA) document.body.classList.add('solta');
+  const zoom = demo && q.has('zoom') && !SOLTA;
+  document.querySelector('.cam-box').style.cssText = 'left:' + X + 'px;top:' + Y + 'px;width:' + W + 'px;height:' + H + 'px';
+  const dica = document.querySelector('.dica');
+  dica.innerHTML = '<b>' + (SOLTA ? 'Só a câmera' : 'Tela do LoL') + ' · OBS · fonte Navegador · ' + SW + ' × ' + SH + '</b><span>clique em qualquer lugar pra soltar a flecha 🏹</span>';
+  if (SOLTA) {                                          // a fonte é pequena: a dica fica fora dela
+    dica.classList.add('fixa');
+    dica.innerHTML += '<span>a câmera fica ' + X + ' px da esquerda e ' + Y + ' px do topo da fonte</span>';
+    document.body.appendChild(dica);
+  } else { dica.style.left = Math.round(SW * .3) + 'px'; dica.style.top = Math.round(SW * .09) + 'px'; }
+  if (demo && !SOLTA) {                                 // o HUD do LoL e o overlay dela, de mentirinha (medido da live)
+    const s = SW / 1920, hud = (cls, x, y, w, h, txt) => {
+      const d = document.createElement('div');
+      d.className = 'demo-only hud ' + cls;
+      d.style.cssText = 'left:' + x * s + 'px;top:' + y * s + 'px;width:' + w * s + 'px;height:' + h * s + 'px';
+      d.textContent = txt;
+      palco.insertBefore(d, cena);
+    };
+    hud('', 0, 0, 270, 96, 'status');
+    hud('texto', 900, 2, 360, 36, 'pixgg.com/lulululeta');
+    hud('meta', 738, 44, 676, 52, 'live hiper mega alcoolica (R$ 49,49/R$ 100,00)');
+    hud('texto', 930, 100, 300, 34, 'Termina em 1 semana');
+    hud('', 1560, 0, 360, 32, '4 vs 7 · 0/1/7 · 02:24');
+    hud('', 510, 965, 570, 115, 'habilidades');
+    hud('', 1085, 975, 150, 105, 'itens');
+    for (const x of [1683, 1750, 1818, 1886]) { hud('retrato', x - 28, 697, 56, 56, ''); hud('barra', x - 31, 757, 62, 18, ''); }
+    hud('retrato', 1858, 630, 56, 56, '');
+  }
+
+  // ================================================================
+  //  desenhos (strings SVG, coordenadas da tela)
+  // ================================================================
+  const anima = (t0, t1, a) => 'style="--t:' + f(rnd(t0, t1)) + 's;--d:-' + f(rnd(0, 6)) + 's;--a:' + a + 'deg"';
+
+  // brilhinho de 4 pontas
+  function dBrilho(cx, cy, r) {
+    const a = r * .16, b = r * .3;
+    return 'M' + f(cx) + ' ' + f(cy - r) +
+      'C' + f(cx + a) + ' ' + f(cy - b) + ' ' + f(cx + b) + ' ' + f(cy - a) + ' ' + f(cx + r) + ' ' + f(cy) +
+      'C' + f(cx + b) + ' ' + f(cy + a) + ' ' + f(cx + a) + ' ' + f(cy + b) + ' ' + f(cx) + ' ' + f(cy + r) +
+      'C' + f(cx - a) + ' ' + f(cy + b) + ' ' + f(cx - b) + ' ' + f(cy + a) + ' ' + f(cx - r) + ' ' + f(cy) +
+      'C' + f(cx - b) + ' ' + f(cy - a) + ' ' + f(cx - a) + ' ' + f(cy - b) + ' ' + f(cx) + ' ' + f(cy - r) + 'Z';
+  }
+  // estrela de 5 pontas
+  function dEstrela(cx, cy, r) {
+    let d = '';
+    for (let i = 0; i < 10; i++) {
+      const a = -Math.PI / 2 + i * Math.PI / 5, rr = i % 2 ? r * .47 : r;
+      d += (i ? 'L' : 'M') + f(cx + Math.cos(a) * rr) + ' ' + f(cy + Math.sin(a) * rr);
+    }
+    return d + 'Z';
+  }
+  // coração centrado em (cx, cy), com uns 2r de largura
+  function dCoracao(cx, cy, r) {
+    const s = r / 14, P = (a, b) => f(cx + a * s) + ' ' + f(cy + (b + 2.5) * s);
+    return 'M' + P(0, 9) + 'C' + P(-9, 3) + ' ' + P(-14, -2) + ' ' + P(-14, -6.8) + 'C' + P(-14, -11.6) + ' ' + P(-10.4, -14) + ' ' + P(-7, -14) +
+      'C' + P(-4, -14) + ' ' + P(-1.6, -12.4) + ' ' + P(0, -9.6) + 'C' + P(1.6, -12.4) + ' ' + P(4, -14) + ' ' + P(7, -14) +
+      'C' + P(10.4, -14) + ' ' + P(14, -11.6) + ' ' + P(14, -6.8) + 'C' + P(14, -2) + ' ' + P(9, 3) + ' ' + P(0, 9) + 'Z';
+  }
+  function brilho(cx, cy, r, cor) {
+    return '<path d="' + dBrilho(cx, cy, r) + '" fill="' + (cor || COR.douradoClaro) + '" stroke="' + CONT + '" stroke-width="' + f(Math.max(.8, r * .16)) + '" stroke-linejoin="round"/>';
+  }
+  function pisca(x, y, r) {                             // brilhinho que acende e apaga
+    return '<path class="pisca" ' + anima(2.2, 4.2, 0) + ' d="' + dBrilho(x, y, r) + '" fill="' + escolhe(['#fff', COR.rosaClaro, '#fff', COR.douradoClaro]) + '"/>';
+  }
+
+  // ---------- Soul Gem da Madoka: gema rosa num engaste dourado; centro em (x, y) ----------
+  function gemaSVG(x, y, s) {
+    const ct = w => 'stroke="' + CONT + '" stroke-width="' + w + '" stroke-linejoin="round"';
+    return '<g transform="translate(' + f(x) + ' ' + f(y) + ') scale(' + f(s) + ')"><g class="pop" data-x="' + f(x) + '">' +
+      '<circle class="aura" r="24" fill="url(#gAura)"/>' +
+      // pezinho
+      '<path d="M-6.8 23Q0 26 6.8 23L5.2 19.8Q0 21.2 -5.2 19.8Z" fill="url(#gOuro)" ' + ct(1.3) + '/>' +
+      '<path d="M-2.8 15.6L-3.6 20.4Q0 21.4 3.6 20.4L2.8 15.6Z" fill="url(#gOuro)" ' + ct(1.2) + '/>' +
+      // a gema
+      '<path d="M0 -16C7 -16 11.5 -6 11.5 2C11.5 9 6.5 14 0 14C-6.5 14 -11.5 9 -11.5 2C-11.5 -6 -7 -16 0 -16Z" fill="url(#gGema)" ' + ct(1.5) + '/>' +
+      '<ellipse cx="0" cy="4" rx="6.2" ry="7.4" fill="#ffd6ec" opacity=".32"/>' +
+      '<ellipse cx="-4.3" cy="-6.4" rx="2.5" ry="5.2" transform="rotate(24 -4.3 -6.4)" fill="#fff" opacity=".88"/>' +
+      '<circle cx="5.4" cy="6" r="1.4" fill="#fff" opacity=".6"/>' +
+      // engaste embaixo e a coroinha em cima
+      '<path d="M-12 2.4C-11.4 11 -6 17.6 0 17.6C6 17.6 11.4 11 12 2.4L9.4 4.4C8.6 10.6 4.6 14.6 0 14.6C-4.6 14.6 -8.6 10.6 -9.4 4.4Z" fill="url(#gOuro)" ' + ct(1.3) + '/>' +
+      '<path d="M-5.2 -14.2Q0 -12 5.2 -14.2L3.8 -19.2L1.8 -16.4L0 -21.8L-1.8 -16.4L-3.8 -19.2Z" fill="url(#gOuro)" ' + ct(1.2) + '/>' +
+      '<circle cx="0" cy="-15.2" r="1.3" fill="' + COR.rosa + '" stroke="' + CONT + '" stroke-width=".6"/>' +
+    '</g></g>';
+  }
+
+  // ---------- círculo mágico atrás da gema: dois aros com as marquinhas, estrela de 8 pontas ----------
+  let circEl = null;
+  function circuloSVG(x, y, s) {
+    let cheio = '', tracos = '', estrela = '';
+    for (let i = 0; i < 24; i++) {                      // entre os aros: brilhinho, bolinha e tracinho, tipo as letrinhas das bruxas
+      const a = i * Math.PI / 12, c = Math.cos(a), sn = Math.sin(a), cx = c * 45.6, cy = sn * 45.6;
+      if (i % 3 === 0) cheio += dBrilho(cx, cy, 2.7);
+      else if (i % 3 === 1) cheio += 'M' + f(cx + 1) + ' ' + f(cy) + 'a1 1 0 1 0 -2 0a1 1 0 1 0 2 0';
+      else tracos += 'M' + f(c * 43.8) + ' ' + f(sn * 43.8) + 'L' + f(c * 47.4) + ' ' + f(sn * 47.4);
+    }
+    for (const g0 of [0, Math.PI / 4]) {                // dois quadrados = estrela de 8 pontas
+      for (let i = 0; i < 4; i++) { const a = g0 + i * Math.PI / 2; estrela += (i ? 'L' : 'M') + f(Math.cos(a) * 37) + ' ' + f(Math.sin(a) * 37); }
+      estrela += 'Z';
+    }
+    return '<g transform="translate(' + f(x) + ' ' + f(y) + ') scale(' + f(s) + ')"><g class="circulo">' +
+      '<circle r="56" fill="url(#gHalo)"/>' +
+      '<g class="gira">' +
+        '<circle r="49.4" fill="none" stroke="#fff0f7" stroke-width="1.6"/>' +
+        '<circle r="41.8" fill="none" stroke="' + COR.rosa + '" stroke-width="1.1"/>' +
+        '<path d="' + cheio + '" fill="#fff"/>' +
+        '<path d="' + tracos + '" stroke="#ffd0e6" stroke-width="1.2" stroke-linecap="round"/>' +
+      '</g>' +
+      '<g class="gira-contra">' +
+        '<path d="' + estrela + '" fill="none" stroke="#ffc2df" stroke-width="1.2" stroke-linejoin="round"/>' +
+        '<circle r="26" fill="none" stroke="#fff" stroke-width=".9" stroke-dasharray="4.4 2.6"/>' +
+        '<circle r="19.5" fill="none" stroke="' + COR.rosa + '" stroke-width=".8"/>' +
+      '</g>' +
+    '</g></g>';
+  }
+
+  // ---------- o laço vermelho do cabelo da Madoka; nó em (x, y) ----------
+  function lacoSVG(x, y, s) {
+    const ct = 'stroke="' + CONT + '" stroke-width="1.5" stroke-linejoin="round"';
+    const alca = m => {
+      const P = (a, b) => f(a * m) + ' ' + f(b);
+      return '<path d="M' + P(1.5, -1.5) + 'C' + P(8, -14.5) + ' ' + P(24.5, -15.5) + ' ' + P(26.5, -6) + 'C' + P(28, 1.8) + ' ' + P(16, 5.8) + ' ' + P(1.5, 2) + 'Z" fill="url(#gLaco)" ' + ct + '/>' +
+        '<path d="M' + P(3.6, -.4) + 'C' + P(10, -7.4) + ' ' + P(18.4, -8.2) + ' ' + P(21.4, -4.6) + 'C' + P(16, -3) + ' ' + P(9, -1) + ' ' + P(3.6, 1.1) + 'Z" fill="' + COR.vermelhoEscuro + '" opacity=".55"/>' +
+        '<path d="M' + P(9, -9.8) + 'Q' + P(16.5, -12.6) + ' ' + P(22, -9.6) + '" fill="none" stroke="#fff" stroke-opacity=".55" stroke-width="1.5" stroke-linecap="round"/>';
+    };
+    return '<g transform="translate(' + f(x) + ' ' + f(y) + ') scale(' + f(s) + ')"><g class="pop" data-x="' + f(x) + '">' +
+      alca(-1) + alca(1) +
+      '<rect x="-4.8" y="-5.2" width="9.6" height="10" rx="3.6" fill="url(#gLaco)" ' + ct + '/>' +
+      '<path d="M-2.2 -3.1Q0 -3.9 2.2 -3.1" fill="none" stroke="#fff" stroke-opacity=".55" stroke-width="1.1" stroke-linecap="round"/>' +
+    '</g></g>';
+  }
+  // as pontas do laço deitadas na borda: 'd' vai pra direita pela borda de cima, 'b' desce pela borda da esquerda
+  function caudaSVG(tipo, x, y, L, w) {
+    const n = w * .7, a = 1.1 * k, ct = 'stroke="' + CONT + '" stroke-width="' + f(1.3 * k) + '" stroke-linejoin="round"';
+    const d = tipo === 'd'
+      ? 'M' + f(x) + ' ' + f(y - w / 2) + 'Q' + f(x + L * .5) + ' ' + f(y - w / 2 - 2 * a) + ' ' + f(x + L) + ' ' + f(y - w / 2 + a) +
+        'L' + f(x + L - n) + ' ' + f(y + a * .6) + 'L' + f(x + L) + ' ' + f(y + w / 2 + a) + 'Q' + f(x + L * .5) + ' ' + f(y + w / 2 - a) + ' ' + f(x) + ' ' + f(y + w / 2) + 'Z'
+      : 'M' + f(x - w / 2) + ' ' + f(y) + 'Q' + f(x - w / 2 - 2 * a) + ' ' + f(y + L * .5) + ' ' + f(x - w / 2 + a) + ' ' + f(y + L) +
+        'L' + f(x + a * .6) + ' ' + f(y + L - n) + 'L' + f(x + w / 2 + a) + ' ' + f(y + L) + 'Q' + f(x + w / 2 - a) + ' ' + f(y + L * .5) + ' ' + f(x + w / 2) + ' ' + f(y) + 'Z';
+    const luz = tipo === 'd'
+      ? 'M' + f(x + L * .12) + ' ' + f(y - w * .22) + 'Q' + f(x + L * .5) + ' ' + f(y - w * .36) + ' ' + f(x + L * .8) + ' ' + f(y - w * .18)
+      : 'M' + f(x - w * .22) + ' ' + f(y + L * .12) + 'Q' + f(x - w * .36) + ' ' + f(y + L * .5) + ' ' + f(x - w * .18) + ' ' + f(y + L * .8);
+    return '<g class="cauda-' + tipo + '"><path d="' + d + '" fill="url(#gLaco)" ' + ct + '/>' +
+      '<path d="' + luz + '" fill="none" stroke="#fff" stroke-opacity=".4" stroke-width="' + f(1.1 * k) + '" stroke-linecap="round"/></g>';
+  }
+
+  // ---------- Kyubey sentado; base em (x, y) ----------
+  let kb = null, kbEl = null;
+  function kyubeySVG(x, y, s, espelho) {
+    kb = { x, y, s, espelho, topo: y - 58 * s };
+    const ct = w => 'stroke="' + CONT + '" stroke-width="' + w + '" stroke-linejoin="round"';
+    const orelha = m => {
+      const P = (a, b) => f(a * m) + ' ' + f(b);
+      return '<path d="M' + P(4.6, -40.6) + 'C' + P(6.6, -47.6) + ' ' + P(9.8, -54) + ' ' + P(14.6, -57.4) + 'C' + P(15.8, -51.4) + ' ' + P(14.8, -44.4) + ' ' + P(12.6, -38.8) + 'Z" fill="#fff" ' + ct(1.4) + '/>' +
+        '<path d="M' + P(7.2, -41.2) + 'C' + P(8.8, -46.2) + ' ' + P(10.9, -50.4) + ' ' + P(13.4, -53.2) + 'C' + P(13.9, -48.6) + ' ' + P(13.1, -44.2) + ' ' + P(11.6, -40.4) + 'Z" fill="#ffb6d2"/>';
+    };
+    const fio = m => {                                  // o fio que sai de dentro da orelha, com o anel dourado e a ponta rosa
+      const P = (a, b) => f(a * m) + ' ' + f(b);
+      return '<g class="kb-fio-' + (m < 0 ? 'e' : 'd') + '">' +
+        '<path d="M' + P(8.6, -40.4) + 'C' + P(14.8, -37.4) + ' ' + P(18.8, -30.4) + ' ' + P(19.1, -21.4) + 'C' + P(19.3, -14.4) + ' ' + P(18.1, -7.4) + ' ' + P(16.2, -2.4) +
+          'C' + P(15.2, -7) + ' ' + P(14.6, -13) + ' ' + P(14.6, -19.4) + 'C' + P(14.4, -27.4) + ' ' + P(11.6, -33.4) + ' ' + P(6.6, -36.8) + 'Z" fill="url(#gFio)" ' + ct(1.3) + '/>' +
+        '<path d="M' + P(13.9, -17.6) + 'L' + P(19.8, -16.6) + '" stroke="' + CONT + '" stroke-width="3.8" stroke-linecap="round"/>' +
+        '<path d="M' + P(13.9, -17.6) + 'L' + P(19.8, -16.6) + '" stroke="' + COR.dourado + '" stroke-width="2.3" stroke-linecap="round"/>' +
+      '</g>';
+    };
+    return '<g transform="translate(' + f(x) + ' ' + f(y) + ') scale(' + f(espelho ? -s : s) + ' ' + f(s) + ')"><g class="kyubey"><g class="pop" data-x="' + f(x) + '">' +
+      // o rabão peludo atrás, pra cima
+      '<g class="kb-rabo"><path d="M5.6 -4C16 -3 25.4 -9 27.4 -20.4C29.4 -31.6 24.2 -41.6 15.8 -44.6C19.2 -37.4 20.2 -29.4 17.2 -22.4C14.8 -16.4 10.2 -12.6 4 -11.4Z" fill="url(#gKb)" ' + ct(1.5) + '/>' +
+        '<path d="M18.2 -40.2C21.4 -34 22 -27 19.4 -21" fill="none" stroke="#e4dcee" stroke-width="1.5" stroke-linecap="round"/></g>' +
+      // corpinho sentado e as patinhas
+      '<path d="M-10.2 0C-12.6 -7 -11 -15.2 -6 -19.2C-3 -21.2 3 -21.2 6 -19.2C11 -15.2 12.6 -7 10.2 0Z" fill="url(#gKb)" ' + ct(1.5) + '/>' +
+      '<ellipse cx="-4.5" cy="-1.3" rx="3.5" ry="2.2" fill="#fff" ' + ct(1.1) + '/>' +
+      '<ellipse cx="4.5" cy="-1.3" rx="3.5" ry="2.2" fill="#fff" ' + ct(1.1) + '/>' +
+      // cabeça, orelhas, fios, olhos vermelhos e a boquinha
+      '<g class="kb-cabeca">' + orelha(-1) + orelha(1) +
+        '<ellipse cx="0" cy="-31" rx="14.6" ry="12.2" fill="url(#gKb)" ' + ct(1.5) + '/>' +
+        fio(-1) + fio(1) +
+        '<g class="kb-olhos">' +
+          '<circle cx="-6.2" cy="-31.6" r="3.9" fill="url(#gOlhoKb)" stroke="' + COR.vermelhoEscuro + '" stroke-width=".8"/>' +
+          '<circle cx="6.2" cy="-31.6" r="3.9" fill="url(#gOlhoKb)" stroke="' + COR.vermelhoEscuro + '" stroke-width=".8"/>' +
+          '<circle cx="-7.5" cy="-33.1" r="1.3" fill="#fff"/><circle cx="4.9" cy="-33.1" r="1.3" fill="#fff"/>' +
+          '<circle cx="-5.1" cy="-30" r=".6" fill="#fff"/><circle cx="7.3" cy="-30" r=".6" fill="#fff"/>' +
+        '</g>' +
+        '<path d="M-2.7 -25.4Q-1.35 -23.8 0 -25.4Q1.35 -23.8 2.7 -25.4" fill="none" stroke="' + CONT + '" stroke-width=".95" stroke-linecap="round"/>' +
+      '</g>' +
+    '</g></g></g>';
+  }
+
+  // ---------- rosinhas ----------
+  function rosaD(r) {                                   // uma rosa vista de cima, centrada em (0, 0)
+    let pet = '';
+    for (let i = 0; i < 5; i++) {
+      const a = i * Math.PI * 2 / 5 - Math.PI / 2, a2 = a + Math.PI * 2 / 5, am = (a + a2) / 2;
+      pet += 'M' + f(Math.cos(a) * r * .96) + ' ' + f(Math.sin(a) * r * .96) + 'Q' + f(Math.cos(am) * r * .42) + ' ' + f(Math.sin(am) * r * .42) + ' ' + f(Math.cos(a2) * r * .96) + ' ' + f(Math.sin(a2) * r * .96);
+    }
+    const e = r * .17;
+    return '<circle r="' + f(r) + '" fill="url(#gFlor)" stroke="' + CONT + '" stroke-width="' + f(Math.max(.8, r * .13)) + '"/>' +
+      '<path d="' + pet + '" fill="none" stroke="' + COR.rosaEscuro + '" stroke-width="' + f(r * .1) + '" stroke-linecap="round"/>' +
+      '<path d="M' + f(e * .4) + ' ' + f(-e * .2) + 'A' + f(e) + ' ' + f(e) + ' 0 1 0 ' + f(e * .9) + ' ' + f(e * 1.1) + 'A' + f(e * 2.1) + ' ' + f(e * 2.1) + ' 0 1 0 ' + f(e * 1.6) + ' ' + f(-e * 1.9) +
+        'A' + f(e * 3) + ' ' + f(e * 3) + ' 0 0 0 ' + f(-e * 2.8) + ' ' + f(-e * 1.4) + '" fill="none" stroke="' + COR.magenta + '" stroke-width="' + f(r * .11) + '" stroke-linecap="round"/>' +
+      '<ellipse cx="' + f(-r * .4) + '" cy="' + f(-r * .44) + '" rx="' + f(r * .22) + '" ry="' + f(r * .11) + '" transform="rotate(-38 ' + f(-r * .4) + ' ' + f(-r * .44) + ')" fill="#fff" opacity=".6"/>';
+  }
+  function folhaD(x, y, ang, L) {                       // folha com a nervura, saindo de (x, y) na direção ang
+    return '<g transform="translate(' + f(x) + ' ' + f(y) + ') rotate(' + f(ang) + ')">' +
+      '<path d="M0 0C' + f(L * .3) + ' ' + f(-L * .34) + ' ' + f(L * .72) + ' ' + f(-L * .3) + ' ' + f(L) + ' 0C' + f(L * .72) + ' ' + f(L * .3) + ' ' + f(L * .3) + ' ' + f(L * .34) + ' 0 0Z" fill="url(#gFolha)" stroke="' + CONT + '" stroke-width="' + f(L * .07) + '" stroke-linejoin="round"/>' +
+      '<path d="M' + f(L * .1) + ' 0L' + f(L * .82) + ' 0" stroke="#2d7a45" stroke-width="' + f(L * .05) + '" stroke-linecap="round"/></g>';
+  }
+  function rosasSVG(x, y, s, espelho) {                // cachinho: rosa grande, média e um botão, com folhas
+    return '<g transform="translate(' + f(x) + ' ' + f(y) + ') scale(' + f(espelho ? -s : s) + ' ' + f(s) + ')"><g class="pop" data-x="' + f(x) + '"><g class="balanco" ' + anima(3, 5, 3) + '>' +
+      folhaD(-4, 2, 200, 15) + folhaD(4, 3, -25, 14) + folhaD(-1, 6, 110, 11) +
+      '<g transform="translate(-11 5.5)">' + rosaD(6.6) + '</g>' +
+      '<g transform="translate(10.5 6.5)">' + rosaD(5) + '</g>' +
+      rosaD(9.4) +
+    '</g></g></g>';
+  }
+
+  // ---------- coração e estrelinha colados na borda, tipo adesivo ----------
+  function adesivo(tipo, x, y, giro, s) {
+    const d = tipo === 'coracao' ? dCoracao(0, 0, 12) : dEstrela(0, 0, 13);
+    return '<g transform="translate(' + f(x) + ' ' + f(y) + ') rotate(' + giro + ') scale(' + f(s) + ')"><g class="pop" data-x="' + f(x) + '">' +
+      '<path d="' + d + '" transform="translate(1.4 2.2)" fill="#000" opacity=".3" stroke="#000" stroke-width="6" stroke-linejoin="round"/>' +
+      '<path d="' + d + '" fill="#fff" stroke="' + CONT + '" stroke-width="7.6" stroke-linejoin="round"/>' +
+      '<path d="' + d + '" fill="#fff" stroke="#fff" stroke-width="5" stroke-linejoin="round"/>' +
+      '<path d="' + d + '" fill="url(#' + (tipo === 'coracao' ? 'gRosaAd' : 'gOuro') + ')" stroke="' + CONT + '" stroke-width="1.1" stroke-linejoin="round"/>' +
+      '<path d="M-6.5 -6Q-8.4 -3.6 -7.4 -1.2" fill="none" stroke="#fff" stroke-opacity=".8" stroke-width="1.6" stroke-linecap="round"/>' +
+    '</g></g>';
+  }
+
+  // o contorno da borda: só nos lados que não encostam na beirada da tela
+  function caminhoBorda(xl, yt, xr, yb, r, fora) {
+    const tem = [!abre.cima, !abre.dir, !abre.baixo, !abre.esq];     // cima, direita, baixo, esquerda (sentido horário)
+    const P = (i, fim, aberto) => {                                  // ponta do lado i: encurta pelo canto, ou estica pra fora da tela
+      const e = aberto ? -fora : r;
+      return i === 0 ? (fim ? [xr - e, yt] : [xl + e, yt]) : i === 1 ? (fim ? [xr, yb - e] : [xr, yt + e])
+           : i === 2 ? (fim ? [xl + e, yb] : [xr - e, yb]) : (fim ? [xl, yt + e] : [xl, yb - e]);
+    };
+    const pt = p => f(p[0]) + ' ' + f(p[1]), arco = p => 'A' + f(r) + ' ' + f(r) + ' 0 0 1 ' + pt(p);
+    if (tem.every(Boolean)) {
+      let d = 'M' + pt(P(0, false, false));
+      for (let i = 0; i < 4; i++) d += 'L' + pt(P(i, true, false)) + arco(P((i + 1) % 4, false, false));
+      return d + 'Z';
+    }
+    let d = '';
+    for (let s = 0; s < 4; s++) {
+      if (!tem[s] || tem[(s + 3) % 4]) continue;                     // começa num lado cujo anterior está aberto
+      let i = s;
+      d += 'M' + pt(P(i, false, true));
+      for (;;) {
+        const prox = (i + 1) % 4, segue = tem[prox];
+        d += 'L' + pt(P(i, true, !segue));
+        if (!segue) break;
+        d += arco(P(prox, false, false));
+        i = prox;
+      }
+    }
+    return d;
+  }
+
+  // ================================================================
+  //  monta a cena (precisa da fonte carregada pra medir o nome)
+  // ================================================================
+  const FAMILIA = '"' + C.fonte + '", "Segoe UI", sans-serif';
+  const sK = .88 * k, sG = .95 * k, sL = .92 * k, sCi = .82 * k, sR = 1 * k;   // Kyubey, gema, laço, círculo mágico, rosinhas
+  let placa = null, placaEl = null, penas = [], comecou = false, zonasP = [], flores = [];
+  let gemaP = null, madP = null, alvo = null;
+
+  function formaPlaca(i) {                              // a fita vertical, com o corte em V embaixo; i = recuo pra dentro
+    const p = placa, x0 = p.x0 + i, x1 = p.x1 - i, y0 = p.y0 + i * .6, y1 = p.y1 - i * 1.8, nV = p.nV - i * .4;
+    return 'M' + f(x0) + ' ' + f(y0) + 'L' + f(x1) + ' ' + f(y0) + 'L' + f(x1) + ' ' + f(y1) + 'L' + f(p.cx) + ' ' + f(y1 - nV) + 'L' + f(x0) + ' ' + f(y1) + 'Z';
+  }
+
+  function montar() {
+    const xl = X + ins, xr = X + W - ins, yt = Y + ins, yb = Y + H - ins, r = Math.max(3, RAIO - ins), o = r * (1 - Math.SQRT1_2);
+    const partes = [], frente = [];
+    gemaP = GEMA ? { x: xl + o, y: yt + o } : null;
+
+    // ---- a fita do nome: pendurada na Soul Gem, desce pela borda da esquerda com as letras uma embaixo da outra ----
+    if (NOME) {
+      const topo = gemaP ? gemaP.y + 19 * sG : Y + 14 * k, fim = Math.min(yb, SH) - (ROSAS ? 42 : 16) * k, pad = 9 * k;
+      const letras = [...NOME.toUpperCase()], un = letras.reduce((a, c) => a + (c === ' ' ? .5 : 1), 0);
+      let fs = 21 * k;
+      if (topo + 2 * pad + fs * (un * .96 + .66) > fim) fs = Math.max(6 * k, (fim - topo - 2 * pad) / (un * .96 + .66));   // .66 fs = o corte em V
+      if (fs >= 13 * k) {                               // letras empilhadas
+        medidor.font = fs + 'px ' + FAMILIA;
+        const larg = Math.max(...letras.map(c => medidor.measureText(c).width)), cap = medidor.measureText('L').actualBoundingBoxAscent || fs * .72;
+        const TH = Math.max(fs * 1.5, larg + 12 * k, 26 * k), nV = TH * .42, adv = fs * .96;
+        placa = { modo: 'letras', TH, nV, fs, adv, pad, cap, letras, y1: topo + 2 * pad + un * adv + nV };
+      } else {                                          // nome comprido: deitado, lendo de baixo pra cima
+        fs = 21 * k;
+        medidor.font = fs + 'px ' + FAMILIA;
+        let m = medidor.measureText(NOME), tw = m.width;
+        const TH = Math.max(fs * 1.62, 28 * k), nV = TH * .42, maxL = fim - topo - 2 * pad - nV;
+        if (tw > maxL) { fs *= maxL / tw; medidor.font = fs + 'px ' + FAMILIA; m = medidor.measureText(NOME); tw = m.width; }
+        placa = { modo: 'deitado', TH, nV, fs, pad, asc: m.actualBoundingBoxAscent || fs * .7, desc: m.actualBoundingBoxDescent || 0, y1: topo + tw + 2 * pad + nV };
+      }
+      Object.assign(placa, { cx: xl, x0: xl - placa.TH / 2, x1: xl + placa.TH / 2, y0: topo });
+      placa.cy = (placa.y0 + placa.y1 - placa.nV) / 2;
+    }
+
+    // ---- o Kyubey senta do lado de fora, lá embaixo, perto das rosinhas (no solto, em cima da borda de cima);
+    //      a Madoka aparece em cima de um circulinho mágico, no ar, do lado do canto (no solto, em cima da borda) ----
+    const kbP = !KYUBEY ? null : SOLTA ? { x: X + W * .3, y: Y + 1.4 * k } : { x: Math.max(RX + 30 * k, X - 44 * k), y: Math.min(SH, Y + H) - .5 * k, espelho: true };
+    madP = SOLTA ? { x: X + W * .66, y: Y + 1.2 * k } : { x: Math.max(RX + 60 * k, X - 84 * k), y: Y - 2 * k, plat: true };
+
+    // ---- a flecha: sai do arco pra cima e pra esquerda e estoura no alto, dentro da área desenhada ----
+    const sMa = TAM_MA * k;
+    const [gx, gy] = MADOKA ? [madP.x + G[0] * sMa, madP.y + G[1] * sMa] : gemaP ? [gemaP.x, gemaP.y] : [X + 10 * k, Y + 10 * k];
+    const dist = Math.max(40 * k, Math.min((gx - RX - 75 * k) / -D[0], (gy - RY - 70 * k) / -D[1], 300 * k));
+    alvo = { x: gx + D[0] * dist, y: gy + D[1] * dist, dx: gx, dy: gy };
+
+    // ---- defs ----
+    const hs = 14 * k;
+    partes.push('<defs>' +
+      '<linearGradient id="gOuro" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="' + COR.douradoClaro + '"/><stop offset=".45" stop-color="' + COR.dourado + '"/><stop offset="1" stop-color="' + COR.douradoEscuro + '"/></linearGradient>' +
+      '<radialGradient id="gGema" cx=".4" cy=".32" r=".72"><stop offset="0" stop-color="#fff4fa"/><stop offset=".28" stop-color="#ffa6d2"/><stop offset=".62" stop-color="#ff4fa6"/><stop offset="1" stop-color="#a80f62"/></radialGradient>' +
+      '<radialGradient id="gAura"><stop offset="0" stop-color="#ff8cc8" stop-opacity=".8"/><stop offset=".5" stop-color="#ff8cc8" stop-opacity=".3"/><stop offset="1" stop-color="#ff8cc8" stop-opacity="0"/></radialGradient>' +
+      '<radialGradient id="gHalo"><stop offset="0" stop-color="#ff9ccf" stop-opacity=".3"/><stop offset=".72" stop-color="#ff9ccf" stop-opacity=".14"/><stop offset="1" stop-color="#ff9ccf" stop-opacity="0"/></radialGradient>' +
+      '<linearGradient id="gLaco" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff6a7e"/><stop offset=".5" stop-color="' + COR.vermelho + '"/><stop offset="1" stop-color="#a8142e"/></linearGradient>' +
+      '<radialGradient id="gKb" cx=".42" cy=".32" r=".75"><stop offset="0" stop-color="#fff"/><stop offset=".6" stop-color="#fbf8fd"/><stop offset="1" stop-color="#e4dcee"/></radialGradient>' +
+      '<radialGradient id="gOlhoKb" cx=".45" cy=".4" r=".65"><stop offset="0" stop-color="#ff8595"/><stop offset=".6" stop-color="' + COR.vermelho + '"/><stop offset="1" stop-color="' + COR.vermelhoEscuro + '"/></radialGradient>' +
+      '<linearGradient id="gFio" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff"/><stop offset=".5" stop-color="#fff"/><stop offset=".78" stop-color="#ffc2dc"/><stop offset="1" stop-color="#ff6fae"/></linearGradient>' +
+      '<radialGradient id="gFlor" cx=".4" cy=".35" r=".7"><stop offset="0" stop-color="#ffd8ea"/><stop offset=".55" stop-color="#ff8cc4"/><stop offset="1" stop-color="' + COR.rosaEscuro + '"/></radialGradient>' +
+      '<linearGradient id="gFolha" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8fdc9c"/><stop offset="1" stop-color="#3e9b58"/></linearGradient>' +
+      '<linearGradient id="gRosaAd" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffb8d9"/><stop offset=".5" stop-color="#ff64aa"/><stop offset="1" stop-color="#d23586"/></linearGradient>' +
+      '<linearGradient id="gRosaBorda" gradientUnits="userSpaceOnUse" x1="' + f(X) + '" y1="' + f(Y) + '" x2="' + f(X + W) + '" y2="' + f(Y + H) + '">' +
+        '<stop offset="0" stop-color="#ffb0d6"/><stop offset=".2" stop-color="' + COR.rosa + '"/><stop offset=".4" stop-color="#ffc4e0"/><stop offset=".6" stop-color="' + COR.rosa + '"/><stop offset=".8" stop-color="#ff9ccc"/><stop offset="1" stop-color="#e8559e"/></linearGradient>' +
+      '<linearGradient id="gMiolo" gradientUnits="userSpaceOnUse" x1="0" y1="' + f(Y) + '" x2="0" y2="' + f(Y + H) + '"><stop offset="0" stop-color="#ffe6f2"/><stop offset="1" stop-color="#ffcce4"/></linearGradient>' +
+      '<linearGradient id="gPlaca" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#ffb3d6"/><stop offset=".5" stop-color="' + COR.rosa + '"/><stop offset="1" stop-color="#ec57a0"/></linearGradient>' +
+      '<linearGradient id="gTexto" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff"/><stop offset=".55" stop-color="#fff"/><stop offset="1" stop-color="#ffd6ea"/></linearGradient>' +
+      '<linearGradient id="gReflexo" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".5" stop-color="#fff" stop-opacity=".55"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>' +
+      '<pattern id="pCoracoes" patternUnits="userSpaceOnUse" width="' + f(hs) + '" height="' + f(hs) + '">' +
+        '<path d="' + dCoracao(hs * .3, hs * .32, 2.3 * k) + '" fill="#ff5fa8"/>' +
+        '<circle cx="' + f(hs * .78) + '" cy="' + f(hs * .76) + '" r="' + f(.75 * k) + '" fill="#ffb3d6"/>' +
+      '</pattern>' +
+      (placa ? '<clipPath id="clipPlaca"><path d="' + formaPlaca(0) + '"/></clipPath>' : '') +
+    '</defs>');
+
+    // ---- a borda: rosa com filete dourado, o miolo clarinho de coraçõezinhos e a rendinha branca por dentro ----
+    const dB = caminhoBorda(xl, yt, xr, yb, r, 40 * k), bm = B * .5;
+    const dR = caminhoBorda(X + 2 * ins, Y + 2 * ins, X + W - 2 * ins, Y + H - 2 * ins, Math.max(1, r - ins), 40 * k);   // a beirada de dentro
+    const linha = (stroke, w, extra) => '<path d="' + dB + '" fill="none" stroke="' + stroke + '" stroke-width="' + f(w) + '" stroke-linejoin="round" ' + (extra || '') + '/>';
+    const rl = 2.5 * k, passo = 2 * rl + 1.1 * k;
+    const renda = (stroke, w) => '<path d="' + dR + '" fill="none" stroke="' + stroke + '" stroke-width="' + f(w) + '" stroke-linecap="round" stroke-dasharray="0 ' + f(passo) + '"/>';
+    partes.push(
+      renda(CONT, 2 * rl + 1.6 * k), renda('#fff', 2 * rl), renda(COR.rosaClaro, rl * .7),
+      linha(COR.rosa, B + CW + 14 * k, 'stroke-opacity=".12"'), linha(COR.douradoClaro, B + CW + 7 * k, 'stroke-opacity=".16"'),
+      linha(CONT, B + CW), linha('url(#gRosaBorda)', B),
+      linha(COR.dourado, bm + 2.6 * k), linha('url(#gMiolo)', bm), linha('url(#pCoracoes)', bm),
+      '<path d="' + dB + '" transform="translate(' + f(-B * .16) + ' ' + f(-B * .34) + ')" fill="none" stroke="#fff" stroke-opacity=".35" stroke-width="' + f(B * .1) + '" stroke-linecap="round"/>',
+      '<path class="brilho-borda" d="' + dB + '" fill="none" stroke="#fff" stroke-opacity=".9" stroke-width="' + f(B * .42) + '" stroke-linecap="round"/>');
+
+    // ---- brilhinhos piscando em volta (atrás da fita) ----
+    const zb = SOLTA ? [X - 40 * k, X + W + 40 * k, 14 * k, Y - 80 * k] : [RX + 40 * k, X - 40 * k, RY + 20 * k, Y - 70 * k];
+    for (let i = 0; i < 6; i++) partes.push(pisca(rnd(zb[0], zb[1]), rnd(zb[2], zb[3]), rnd(4, 7) * k));
+
+    // ---- coração e estrelinha colados na borda, rosinhas nos cantos ----
+    if (ROSAS) {
+      const ads = SOLTA ? [['coracao', X + W * .5, yb, -8], ['estrela', xr, Y + H * .5, 10]] : [];
+      const rosas = SOLTA ? [[xl + o, yb - o, false], [xr - o, yt + o, true]] : [[xl, Math.min(yb, SH) - 20 * k, false]];
+      for (const [tipo, x, y, g] of ads) partes.push(adesivo(tipo, x, y, g, .8 * k));
+      for (const [x, y, esp] of rosas) { partes.push(rosasSVG(x, y, sR, esp)); flores.push({ x, y, r: 14 * k }); }
+    }
+
+    // ---- o canto: círculo mágico, as pontas do laço deitadas na borda, o laço e a Soul Gem por cima ----
+    const cx0 = gemaP ? gemaP.x : xl + o, cy0 = gemaP ? gemaP.y : yt + o;
+    if (gemaP) partes.push(circuloSVG(cx0, cy0, sCi));
+    if (LACO) {
+      const wC = B * .78;
+      if (!abre.cima) partes.push(caudaSVG('d', cx0 + 4 * k, yt, 54 * k, wC));
+      if (!abre.esq && !placa) partes.push(caudaSVG('b', xl, cy0 + 4 * k, 54 * k, wC));
+    }
+
+    // ---- a fita ----
+    if (placa) {
+      const p = placa, fam = FAMILIA.replace(/"/g, ''), esc = t => t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      const txt = (c, x, y, extra) => '<text x="' + f(x) + '" y="' + f(y) + '" text-anchor="middle" font-family=\'' + fam + '\' font-size="' + f(p.fs) + '" ' + extra + '>' + esc(c) + '</text>';
+      const sombra = 'fill="' + COR.magenta + '" stroke="' + COR.magenta + '" stroke-width="' + f(4.2 * k) + '" stroke-linejoin="round"';
+      const cheio = 'fill="url(#gTexto)" stroke="' + CONT + '" stroke-width="' + f(3.6 * k) + '" stroke-linejoin="round" paint-order="stroke"';
+      let letras = '';
+      if (p.modo === 'letras') {
+        let pos = 0;
+        for (const c of p.letras) {
+          if (c === ' ') { pos += .5; continue; }
+          const base = p.y0 + p.pad + p.adv * (pos + .5) + p.cap / 2;
+          letras += txt(c, p.cx + 1.3 * k, base + 1.8 * k, sombra) + txt(c, p.cx, base, cheio);
+          pos++;
+        }
+      } else {
+        const base = p.cy + (p.asc - p.desc) / 2;
+        letras = '<g transform="rotate(-90 ' + f(p.cx) + ' ' + f(p.cy) + ')">' + txt(NOME, p.cx, base + 2 * k, sombra) + txt(NOME, p.cx, base, cheio) + '</g>';
+      }
+      frente.push('<g class="placa">' +
+        '<path d="' + formaPlaca(0) + '" transform="translate(' + f(2.6 * k) + ' ' + f(2.6 * k) + ')" fill="rgba(0,0,0,.3)"/>' +
+        '<path d="' + formaPlaca(0) + '" fill="url(#gPlaca)" stroke="' + CONT + '" stroke-width="' + f(2.8 * k) + '" stroke-linejoin="round"/>' +
+        '<path d="' + formaPlaca(3.4 * k) + '" fill="none" stroke="' + COR.douradoClaro + '" stroke-width="' + f(1.2 * k) + '" stroke-linejoin="round"/>' +
+        '<g clip-path="url(#clipPlaca)"><rect class="reflexo-v" style="--dist:' + f(p.y1 - p.y0 + 90 * k) + 'px" x="' + f(p.x0 - 4 * k) + '" y="' + f(p.y0 - 60 * k) + '" width="' + f(p.TH + 8 * k) + '" height="' + f(30 * k) + '" fill="url(#gReflexo)"/></g>' +
+        letras +
+        '<g class="cintila" ' + anima(2.4, 3.4, 0) + '>' + brilho(p.x0, p.y1 - 1 * k, 6 * k, '#fff') + '</g>' +
+      '</g>');
+      for (const u of [.2, .5, .8]) flores.push({ x: p.cx, y: p.y0 + (p.y1 - p.y0) * u, r: p.TH / 2 });
+    }
+
+    // ---- laço e Soul Gem por cima da ponta da fita; o Kyubey sentado nela ----
+    if (LACO) frente.push(lacoSVG(cx0, cy0 - (gemaP ? 7 * sG : 0), sL));
+    if (gemaP) { frente.push(gemaSVG(cx0, cy0, sG)); flores.push({ x: cx0, y: cy0, r: 14 * k }); }
+    if (kbP) frente.push(kyubeySVG(kbP.x, kbP.y, sK, kbP.espelho));
+
+    cena.innerHTML = partes.join('') + frente.join('');
+    placaEl = cena.querySelector('.placa');
+    kbEl = cena.querySelector('.kyubey');
+    circEl = cena.querySelector('.circulo');
+    if (kb) flores.push({ x: kb.x, y: kb.y - 28 * kb.s, r: 16 * kb.s });
+
+    // o brilho da borda: um traço que corre a borda toda e some por um tempo
+    const bb = cena.querySelector('.brilho-borda'), L = bb.getTotalLength(), Dd = 44 * k;
+    bb.style.strokeDasharray = f(Dd) + ' ' + f(2 * L);
+    bb.style.setProperty('--de', f(Dd) + 'px'); bb.style.setProperty('--ate', f(-2 * L) + 'px');
+    bb.style.setProperty('--t', f((Dd + 2 * L) / (240 * k)) + 's');
+
+    // ---- onde as penas caem: do lado de fora da câmera, nunca na frente dela ----
+    if (SOLTA) zonasP = [{ x0: 14 * k, x1: X - 18 * k, y0: 0, y1: SH }, { x0: X + W + 18 * k, x1: SW - 14 * k, y0: 0, y1: SH },
+                         { x0: X - 10 * k, x1: X + W + 10 * k, y0: 0, y1: Y - 26 * k }];
+    else zonasP = [{ x0: RX + 24 * k, x1: X - 22 * k, y0: RY, y1: RB }];
+    for (const z of zonasP) z.x1 = Math.max(z.x1, z.x0 + 10 * k);
+    for (let i = 0; i < NP; i++) penas.push(novaPena(i, true));
+  }
+
+  // ================================================================
+  //  carimbos (desenhos prontos, pintados no canvas): penas e a Madoka
+  // ================================================================
+  const PENA_VB = [-10, -25, 20, 50], TAM_PENA = .78;   // tamanho da pena (vezes k)
+  const CORES_PENA = [['#ffffff', '#ffe4f1', '#ffa6d2'], ['#fff4fa', '#ffc2df', '#ff7eb9'], ['#ffd0e6', '#ff8cc4', '#e2489a'], ['#ffffff', '#fff6fb', '#ffcfe5']];
+  // a Madoka mira pra cima e pra esquerda: D é pra onde a flecha vai, N é o arco em pé
+  const MADOKA_VB = [-40, -88, 76, 92], TAM_MA = 1;
+  const ANG = 25 * Math.PI / 180, D = [-Math.cos(ANG), -Math.sin(ANG)], N = [Math.sin(ANG), -Math.cos(ANG)];
+  const G = [-31, -56], L_ARCO = 21, C_ARCO = 5.5, PUXA = 13, L_FLECHA = 30;   // mão do arco, meio arco, curva, quanto a corda puxa, flecha
+  const T1 = [G[0] + N[0] * L_ARCO - D[0] * C_ARCO, G[1] + N[1] * L_ARCO - D[1] * C_ARCO];   // ponta de cima do arco
+  const T2 = [G[0] - N[0] * L_ARCO - D[0] * C_ARCO, G[1] - N[1] * L_ARCO - D[1] * C_ARCO];   // ponta de baixo
+  const OMBRO = [11, -42.4];                            // ombro do braço que puxa a corda
+  let carimbosPena = [], carimboMadoka = null;
+
+  function svgPronto(vb, w, h, miolo) {
+    return '<svg xmlns="http://www.w3.org/2000/svg" width="' + w + '" height="' + h + '" viewBox="' + vb.join(' ') + '">' + miolo + '</svg>';
+  }
+  function penaSVG(c) {                                 // pena de asa: haste curvinha, entalhes na beirada e penugem no pé
+    const vane = 'M-1 -23C3 -20 6.5 -14 7.4 -9L4.6 -7.4L7.8 -5.4C8.2 -1 7 3.6 5.6 5.4L3.4 5.2L5.2 7.6C4 10.5 2.4 12.4 .6 13.4L.2 13.6' +
+                 'C-2.6 11.8 -4.6 8.4 -5.3 4.6L-3.2 3.4L-5.6 1.8C-6.2 -4 -5.2 -12 -1 -23Z';
+    return '<defs><linearGradient id="pn" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="' + c[0] + '"/><stop offset=".6" stop-color="' + c[1] + '"/><stop offset="1" stop-color="' + c[2] + '"/></linearGradient></defs>' +
+      '<path d="' + vane + '" fill="url(#pn)" stroke="' + CONT + '" stroke-opacity=".7" stroke-width="1.1" stroke-linejoin="round"/>' +
+      '<path d="M.3 -14L5.4 -15.6M.5 -3L6.6 -3.6M.6 7L4.2 8.4M-.3 -9L-4.4 -11M-.1 1L-4.8 -.2M.2 10L-2.8 10.4" stroke="#fff" stroke-opacity=".75" stroke-width=".75" stroke-linecap="round"/>' +
+      '<path d="M.6 24Q.8 0 -1 -22" fill="none" stroke="' + CONT + '" stroke-opacity=".6" stroke-width="1.7" stroke-linecap="round"/>' +
+      '<path d="M.6 24Q.8 0 -1 -22" fill="none" stroke="#fff" stroke-width=".85" stroke-linecap="round"/>' +
+      '<path d="M.5 13.5q-3.2 .6 -4.6 3.6M.6 15q-2.4 1.2 -2.8 4.4M.6 13.8q3.2 .4 4.4 3.4M.7 15.2q2.2 1.2 2.6 4.2" fill="none" stroke="#fff" stroke-opacity=".9" stroke-width=".8" stroke-linecap="round"/>';
+  }
+  function madokaSVG() {                                // a Madoka de garota mágica, de lado, com o arco de rosa (a corda, a flecha e o braço que puxa são pintados no canvas)
+    const ct = w => 'stroke="' + CONT + '" stroke-width="' + w + '" stroke-linejoin="round"';
+    const pele = '#ffe8dc', q2 = (x, y) => f(x) + ' ' + f(y);
+    const laco = (x, y, a) => '<g transform="translate(' + x + ' ' + y + ') rotate(' + a + ')">' +
+      '<path d="M0 0C-2 -4.2 -6.4 -5.2 -6.8 -1.2C-7.2 2.6 -3 2.8 0 0C3 2.8 7.2 2.6 6.8 -1.2C6.4 -5.2 2 -4.2 0 0Z" fill="url(#mv)" ' + ct(1.1) + '/>' +
+      '<circle r="1.6" fill="url(#mv)" ' + ct(.9) + '/></g>';
+    const arco = 'M' + q2(T2[0], T2[1]) + 'Q' + q2(G[0] + D[0] * C_ARCO, G[1] + D[1] * C_ARCO) + ' ' + q2(T1[0], T1[1]);
+    return '<defs>' +
+      '<linearGradient id="mc" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffc9e2"/><stop offset=".55" stop-color="#f794c3"/><stop offset="1" stop-color="#e06aa6"/></linearGradient>' +
+      '<linearGradient id="mr" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffbfdc"/><stop offset=".5" stop-color="#ff85bd"/><stop offset="1" stop-color="#e5569c"/></linearGradient>' +
+      '<linearGradient id="mv" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff6a7e"/><stop offset=".5" stop-color="' + COR.vermelho + '"/><stop offset="1" stop-color="#a8142e"/></linearGradient>' +
+      '<radialGradient id="mo" cx=".45" cy=".35" r=".7"><stop offset="0" stop-color="#ffd0e6"/><stop offset=".45" stop-color="#ff5fa8"/><stop offset="1" stop-color="#9e0f55"/></radialGradient>' +
+      '<linearGradient id="ma" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ff9ccc"/><stop offset="1" stop-color="#c2317c"/></linearGradient>' +
+      '<radialGradient id="gFlor" cx=".4" cy=".35" r=".7"><stop offset="0" stop-color="#ffd8ea"/><stop offset=".55" stop-color="#ff8cc4"/><stop offset="1" stop-color="' + COR.rosaEscuro + '"/></radialGradient>' +
+      '<linearGradient id="gFolha" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8fdc9c"/><stop offset="1" stop-color="#3e9b58"/></linearGradient>' +
+    '</defs>' +
+    // cabelo de trás e as marias-chiquinhas
+    '<path d="M-12 -56C-15 -68 -11 -80 3 -81.5C17 -82.5 22 -71 21 -60C20.6 -54 19 -49 17 -46L-9 -46C-11 -49 -12 -52 -12 -56Z" fill="url(#mc)" ' + ct(1.5) + '/>' +
+    '<path d="M-9.5 -70.5C-15 -73.5 -21.5 -72 -24.5 -66.5C-26.8 -62 -26.4 -55.5 -24 -50.5C-23.6 -55 -22.4 -59.6 -19.8 -62.4C-17.4 -64.8 -13.6 -65.8 -10.4 -65.2Z" fill="url(#mc)" ' + ct(1.4) + '/>' +
+    '<path d="M17.5 -70.5C23 -73.5 29.5 -72 32.5 -66.5C34.8 -62 34.4 -55.5 32 -50.5C31.6 -55 30.4 -59.6 27.8 -62.4C25.4 -64.8 21.6 -65.8 18.4 -65.2Z" fill="url(#mc)" ' + ct(1.4) + '/>' +
+    // pernas de meia branca e sapatinho rosa
+    '<path d="M-2 -15L-2.6 -3.4M8 -15L8.6 -3.4" stroke="' + CONT + '" stroke-width="5.8" stroke-linecap="round"/>' +
+    '<path d="M-2 -15L-2.6 -3.4M8 -15L8.6 -3.4" stroke="#fff" stroke-width="4.2" stroke-linecap="round"/>' +
+    '<ellipse cx="-3.8" cy="-2.3" rx="4" ry="2.4" fill="url(#mr)" ' + ct(1.2) + '/>' +
+    '<ellipse cx="9.8" cy="-2.3" rx="4" ry="2.4" fill="url(#mr)" ' + ct(1.2) + '/>' +
+    // saia: babado branco por baixo, a saia rosa bufante e a faixa
+    '<path d="M-4 -31C-8 -26 -12.8 -19 -15.8 -13.6Q-12 -9.8 -7.6 -12.4Q-3.8 -9.4 0 -12Q3 -9.6 6 -12Q9.8 -9.4 13.6 -12.4Q18 -9.8 21.8 -13.6C19 -19 14 -26 10 -31Z" fill="#fff" ' + ct(1.3) + '/>' +
+    '<path d="M-4 -33.5C-8 -28.5 -12.8 -21.5 -15.6 -16.2Q-11.8 -12.6 -7.6 -15.2Q-3.8 -12.2 0 -14.8Q3 -12.4 6 -14.8Q9.8 -12.2 13.6 -15.2Q17.8 -12.6 21.6 -16.2C18.8 -21.5 14 -28.5 10 -33.5Z" fill="url(#mr)" ' + ct(1.4) + '/>' +
+    '<path d="M3 -31.5L1.6 -15.6M-1.8 -31L-6.4 -16.2M7.8 -31L12 -16.2" stroke="#d24a8d" stroke-opacity=".5" stroke-width=".9" stroke-linecap="round"/>' +
+    '<path d="M-4.6 -34.8Q3 -32.8 10.6 -34.8L10.3 -32Q3 -30.2 -4.3 -32Z" fill="' + COR.rosaEscuro + '" ' + ct(1.1) + '/>' +
+    // braço do arco (luva branca), por baixo da manga
+    '<path d="M-6 -43L' + q2(G[0], G[1]) + '" stroke="' + CONT + '" stroke-width="5.8" stroke-linecap="round"/>' +
+    '<path d="M-6 -43L' + q2(G[0], G[1]) + '" stroke="#fff" stroke-width="4.2" stroke-linecap="round"/>' +
+    // blusinha branca com o meio rosa, lacinho no peito, gargantilha com a Soul Gem
+    '<path d="M-3.6 -45C-5 -41 -5 -37 -3.8 -33.8L9.8 -33.8C11 -37 11 -41 9.6 -45Q3 -43 -3.6 -45Z" fill="#fff5fa" ' + ct(1.3) + '/>' +
+    '<path d="M1.2 -43.8L4.8 -43.8L5.4 -34L.6 -34Z" fill="' + COR.rosa + '"/>' +
+    '<path d="M3 -41.4C1 -44.4 -2.6 -44.8 -2.8 -42C-3 -39.6 0 -39.4 3 -41.4C6 -39.4 9 -39.6 8.8 -42C8.6 -44.8 5 -44.4 3 -41.4Z" fill="' + COR.rosaEscuro + '" ' + ct(.9) + '/>' +
+    '<circle cx="3" cy="-41.4" r="1.2" fill="' + COR.rosaEscuro + '" ' + ct(.7) + '/>' +
+    '<rect x=".8" y="-49" width="4.4" height="4.6" fill="' + pele + '"/>' +
+    '<path d="M.2 -46.8Q3 -45.4 5.8 -46.8L5.8 -44.8Q3 -43.4 .2 -44.8Z" fill="url(#mv)" ' + ct(.7) + '/>' +
+    '<ellipse cx="3" cy="-44.2" rx="1.35" ry="1.75" fill="url(#mo)" stroke="' + COR.dourado + '" stroke-width=".6"/>' +
+    // mangas bufantes
+    '<ellipse cx="-4.4" cy="-42.6" rx="4.6" ry="3.9" fill="url(#mr)" ' + ct(1.2) + '/>' +
+    '<ellipse cx="10.6" cy="-42.6" rx="4.6" ry="3.9" fill="url(#mr)" ' + ct(1.2) + '/>' +
+    '<path d="M-8.6 -40.4Q-4.4 -38 -.2 -40.4M6.4 -40.4Q10.6 -38 14.8 -40.4" fill="none" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/>' +
+    // rosto, bochechas, olhos cor-de-rosa e o sorrisinho
+    '<ellipse cx="4" cy="-62.4" rx="15.4" ry="14.6" fill="' + pele + '" ' + ct(1.5) + '/>' +
+    '<ellipse cx="-6.6" cy="-55.4" rx="2.7" ry="1.4" fill="#ff8fb5" opacity=".6"/>' +
+    '<ellipse cx="14" cy="-55.4" rx="2.7" ry="1.4" fill="#ff8fb5" opacity=".6"/>' +
+    '<ellipse cx="-2.8" cy="-59.6" rx="3.3" ry="4.4" fill="url(#mo)" ' + ct(.9) + '/>' +
+    '<ellipse cx="9.8" cy="-59.6" rx="3.5" ry="4.5" fill="url(#mo)" ' + ct(.9) + '/>' +
+    '<path d="M-6.8 -62.6Q-3 -66.2 .8 -63.2M5.8 -63.2Q9.8 -66.4 13.8 -62.6" fill="none" stroke="' + CONT + '" stroke-width="1.7" stroke-linecap="round"/>' +
+    '<circle cx="-4" cy="-61.2" r="1.3" fill="#fff"/><circle cx="8.6" cy="-61.2" r="1.35" fill="#fff"/>' +
+    '<circle cx="-1.6" cy="-57.6" r=".6" fill="#fff"/><circle cx="11.1" cy="-57.6" r=".6" fill="#fff"/>' +
+    '<path d="M1.4 -53.6Q3.6 -50.6 5.8 -53.6Z" fill="#e0507a" ' + ct(.7) + '/>' +
+    // franja com as pontinhas e as mechas do lado
+    '<path d="M-11.6 -63C-12.6 -73.6 -7 -80.4 4 -80.8C15 -81.2 20.6 -73.6 19.6 -63L17.2 -65.8L15.8 -61.8L12.6 -66.8L10.4 -63.2L7.6 -67.8L4.4 -63L1.6 -67.6L-1.4 -63.4L-3.8 -67.6L-6.8 -63.2L-8.6 -66.8L-10.4 -61.8Z" fill="url(#mc)" ' + ct(1.4) + '/>' +
+    '<path d="M-11.6 -65C-14.2 -58.6 -14.2 -51.6 -11.6 -46.6C-10.6 -50.6 -10.2 -55.6 -10.4 -60.6Z" fill="url(#mc)" ' + ct(1.2) + '/>' +
+    '<path d="M19.6 -65C22.2 -58.6 22.2 -51.6 19.6 -46.6C18.6 -50.6 18.2 -55.6 18.4 -60.6Z" fill="url(#mc)" ' + ct(1.2) + '/>' +
+    '<path d="M-4 -77.6Q3 -80.2 10 -77.8" fill="none" stroke="#fff" stroke-opacity=".6" stroke-width="1.3" stroke-linecap="round"/>' +
+    // laços vermelhos nas marias-chiquinhas
+    laco(-10.2, -69.4, -18) + laco(18.2, -69.4, 18) +
+    // o arco de rosa, a mão e a rosinha
+    '<path d="' + arco + '" fill="none" stroke="' + CONT + '" stroke-width="4.4" stroke-linecap="round"/>' +
+    '<path d="' + arco + '" fill="none" stroke="url(#ma)" stroke-width="2.8" stroke-linecap="round"/>' +
+    '<path d="' + arco + '" fill="none" stroke="#ffe3f1" stroke-opacity=".7" stroke-width=".8" stroke-linecap="round" transform="translate(-.5 -.3)"/>' +
+    '<circle cx="' + f(T1[0]) + '" cy="' + f(T1[1]) + '" r="1.5" fill="' + COR.dourado + '" ' + ct(.8) + '/>' +
+    '<circle cx="' + f(T2[0]) + '" cy="' + f(T2[1]) + '" r="1.5" fill="' + COR.dourado + '" ' + ct(.8) + '/>' +
+    '<circle cx="' + f(G[0]) + '" cy="' + f(G[1]) + '" r="2.9" fill="#fff" ' + ct(1.2) + '/>' +
+    folhaD(G[0] + N[0] * 5, G[1] + N[1] * 5, 150, 7) +
+    '<g transform="translate(' + q2(G[0] + N[0] * 6, G[1] + N[1] * 6) + ')">' + rosaD(3.6) + '</g>';
+  }
+
+  // SVG -> canvas, já na resolução em que vai aparecer
+  function carimbo(vb, miolo, escala) {
+    const w = Math.max(1, Math.ceil(vb[2] * escala)), h = Math.max(1, Math.ceil(vb[3] * escala));
+    return new Promise(res => {
+      const img = new Image();
+      img.onload = () => { const c = document.createElement('canvas'); c.width = w; c.height = h; c.getContext('2d').drawImage(img, 0, 0, w, h); res(c); };
+      img.onerror = () => res(null);
+      img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svgPronto(vb, w, h, miolo));
+    });
+  }
+  async function prepararCarimbos() {
+    const eP = TAM_PENA * 1.3 * k * K, eM = TAM_MA * 1.15 * k * K;
+    const [ps, m] = await Promise.all([Promise.all(CORES_PENA.map(c => carimbo(PENA_VB, penaSVG(c), eP))), MADOKA ? carimbo(MADOKA_VB, madokaSVG(), eM) : null]);
+    if (ps.every(Boolean)) carimbosPena = ps;
+    if (m) carimboMadoka = m;
+  }
+
+  // ================================================================
+  //  penas caindo devagar, feito folha: balançam de um lado pro outro
+  // ================================================================
+  const pertoCam = (x, y, m) => {                       // 0 em cima da câmera, 1 a partir de m px dela
+    const dx = Math.max(X - x, 0, x - X - W), dy = Math.max(Y - y, 0, y - Y - H);
+    return Math.min(1, Math.hypot(dx, dy) / m);
+  };
+  const naFonte = (x, y) => Math.max(0, Math.min(1, Math.min(x - RX, RR - x, y - RY, RB - y) / (16 * k)));   // some antes da borda da fonte
+  function zonaAleatoria() {                            // escolhe uma zona pelo tamanho dela
+    const areas = zonasP.map(z => (z.x1 - z.x0) * (z.y1 - z.y0)), tot = areas.reduce((a, b) => a + b, 0);
+    let r = Math.random() * tot;
+    for (let i = 0; i < zonasP.length; i++) { r -= areas[i]; if (r <= 0) return zonasP[i]; }
+    return zonasP[0];
+  }
+  function novaPena(i, espalha) {
+    const z = zonaAleatoria(), amp = Math.min(rnd(8, 18) * k, (z.x1 - z.x0) * .3), x0 = rnd(z.x0 + amp, Math.max(z.x0 + amp, z.x1 - amp));
+    return { i, z, x0, x: x0, y: espalha ? rnd(z.y0, z.y1) : z.y0 - rnd(10, 40) * k, fase: rnd(0, 7), freq: rnd(.8, 1.4), amp, vy: rnd(18, 30) * k,
+             deriva: rnd(-4, 4) * k, tam: TAM_PENA * k * rnd(.8, 1.15), cor: i % CORES_PENA.length, rot: rnd(-.4, .4), ix: 0, iy: 0, gira: 0,
+             idade: espalha ? rnd(0, .8) : 0, ang: 0 };
+  }
+  // as penas vivem num relógio próprio (tb), que anda VEL vezes o normal
+  let tb = 0;
+  function moverPena(p, dt) {
+    const dv = dt * VEL, s = Math.sin(tb * p.freq + p.fase), c = Math.cos(tb * p.freq + p.fase), z = p.z;
+    p.idade += dt;
+    p.y += p.vy * dv * (.5 + .5 * Math.abs(c)) + p.iy * dt;          // cai mais devagar nas pontas do balanço
+    p.x0 += p.deriva * dv + p.ix * dt;
+    const dec = Math.exp(-1.8 * dt); p.ix *= dec; p.iy *= dec;
+    p.rot += p.gira * dt; p.gira *= Math.exp(-1.4 * dt); p.rot *= Math.exp(-.6 * dt);
+    p.x = p.x0 + s * p.amp;
+    p.ang = p.rot + c * .6;                                          // inclina pro lado que está indo
+    if (p.x0 < z.x0 + p.amp) p.x0 += (z.x0 + p.amp - p.x0) * Math.min(1, dt * 2);
+    if (p.x0 > z.x1 - p.amp) p.x0 -= (p.x0 - z.x1 + p.amp) * Math.min(1, dt * 2);
+    if (p.y > z.y1 + 20 * k || p.y < RY - 220 * k) Object.assign(p, novaPena(p.i, false));
+  }
+  function desenhaPenas() {
+    if (!carimbosPena.length) return;
+    for (const p of penas) {
+      const a = Math.min(1, p.idade / .8) * Math.max(0, Math.min(1, (p.z.y1 - p.y) / (40 * k))) * pertoCam(p.x, p.y, 16 * k) * naFonte(p.x, p.y);
+      if (a <= .01) continue;
+      ctx.save();
+      ctx.globalAlpha = a * .95;
+      ctx.translate(p.x, p.y); ctx.rotate(p.ang); ctx.scale(p.tam, p.tam);
+      ctx.drawImage(carimbosPena[p.cor], PENA_VB[0], PENA_VB[1], PENA_VB[2], PENA_VB[3]);
+      ctx.restore();
+    }
+  }
+
+  // ================================================================
+  //  a flecha: a Madoka aparece na fita, puxa o arco e solta; a flecha estoura no alto
+  // ================================================================
+  const EV = { surge: .3, puxa: 1, solta: 1.15, some: 2.8 };   // tempos (s) desde o começo
+  const CONGELA = num('pausa', 0, 0, 10);               // só pra conferir o desenho: para a Madoka nesse instante
+  let evT0 = -99, evAte = -99, mad = null, seta = null, chuvaFila = [], tiraEv = 0;
+  const suave = u => u * u * (3 - 2 * u);
+  const volta = u => 1 + 2.7 * Math.pow(u - 1, 3) + 1.7 * Math.pow(u - 1, 2);   // passa um pouquinho e volta
+  const doArco = (lx, ly) => { const s = TAM_MA * k; return [madP.x + lx * s, madP.y + ly * s]; };   // ponto da Madoka (unidades do desenho) na tela
+  const tempoMad = t => CONGELA ? Math.min(t - mad.t0, CONGELA) : t - mad.t0;
+
+  function flecha(t) {
+    evT0 = t; evAte = t + 3.8;
+    cena.classList.add('evento');
+    clearTimeout(tiraEv);
+    tiraEv = setTimeout(() => cena.classList.remove('evento'), 3800);
+    if (circEl && circEl.animate) circEl.animate([{ transform: 'rotate(0deg) scale(1)' }, { transform: 'rotate(220deg) scale(1.25)', offset: .4 }, { transform: 'rotate(360deg) scale(1)' }],
+      { duration: 1800, easing: 'cubic-bezier(.2,.7,.3,1)' });
+    if (gemaP) for (let i = 0; i < 8; i++) faisca(gemaP.x + rnd(-14, 14) * k, gemaP.y + rnd(-16, 12) * k, rnd(4, 7) * k, rnd(.5, .9), escolhe(['#fff', COR.rosaClaro, COR.douradoClaro]));
+    if (MADOKA && carimboMadoka) {
+      mad = { t0: t, soltou: false, sumiu: false };
+      puf(madP.x - 4 * k, madP.y - 36 * TAM_MA * k, .55);
+    } else lancar(t, alvo.dx, alvo.dy);
+  }
+  function lancar(t, x, y) {                            // a flecha sai voando até o alvo
+    seta = { x0: x, y0: y, x, y, t0: t, dur: Math.max(.25, Math.hypot(alvo.x - x, alvo.y - y) / (560 * k)) };
+  }
+  function atualizaMadoka(t) {
+    const tl = tempoMad(t);
+    if (!mad.soltou && tl >= EV.solta) {
+      mad.soltou = true;
+      const n = C_ARCO + PUXA, [x, y] = doArco(G[0] - D[0] * n + D[0] * L_FLECHA, G[1] - D[1] * n + D[1] * L_FLECHA);
+      lancar(t, x, y);
+    }
+    if (tl > EV.surge && tl < EV.solta && Math.random() < .45) {       // brilhinho juntando na ponta da flecha
+      const u = Math.min(1, (tl - EV.surge) / (EV.puxa - EV.surge)), n = C_ARCO + PUXA * suave(u);
+      const [x, y] = doArco(G[0] - D[0] * n + D[0] * L_FLECHA, G[1] - D[1] * n + D[1] * L_FLECHA);
+      faisca(x + rnd(-9, 9) * k, y + rnd(-9, 9) * k, rnd(2.5, 4.5) * k, rnd(.3, .5), escolhe(['#fff', COR.rosaClaro]));
+    }
+    if (!mad.sumiu && tl >= EV.some) { mad.sumiu = true; puf(madP.x - 4 * k, madP.y - 36 * TAM_MA * k, .5); }
+    if (tl >= EV.some + .4) mad = null;
+  }
+  function flechaLocal(P, a, carga) {                   // flecha de luz encaixada, da ponta de trás (P) pra frente
+    const tip = [P[0] + D[0] * L_FLECHA, P[1] + D[1] * L_FLECHA];
+    ctx.globalAlpha = a;
+    ctx.lineCap = 'round';
+    ctx.strokeStyle = 'rgba(255,120,190,.35)'; ctx.lineWidth = 5;
+    ctx.beginPath(); ctx.moveTo(P[0], P[1]); ctx.lineTo(tip[0], tip[1]); ctx.stroke();
+    ctx.strokeStyle = '#ff8cc6'; ctx.lineWidth = 2.4; ctx.stroke();
+    ctx.strokeStyle = '#fff'; ctx.lineWidth = 1; ctx.stroke();
+    ctx.fillStyle = '#ffb8dc';                          // penas da flecha
+    for (const m of [1, -1]) {
+      ctx.beginPath(); ctx.moveTo(P[0] + D[0] * 1.5, P[1] + D[1] * 1.5); ctx.lineTo(P[0] + D[0] * 7 + N[0] * m * 2.8, P[1] + D[1] * 7 + N[1] * m * 2.8);
+      ctx.lineTo(P[0] + D[0] * 3 + N[0] * m * 3, P[1] + D[1] * 3 + N[1] * m * 3); ctx.closePath(); ctx.fill();
+    }
+    ctx.fillStyle = '#fff'; ctx.strokeStyle = '#ff5fa8'; ctx.lineWidth = .8;   // ponta
+    ctx.beginPath(); ctx.moveTo(tip[0] + D[0] * 4.5, tip[1] + D[1] * 4.5); ctx.lineTo(tip[0] + N[0] * 2.3, tip[1] + N[1] * 2.3);
+    ctx.lineTo(tip[0] - D[0] * 1, tip[1] - D[1] * 1); ctx.lineTo(tip[0] - N[0] * 2.3, tip[1] - N[1] * 2.3); ctx.closePath(); ctx.fill(); ctx.stroke();
+    if (carga > 0) {                                    // luz crescendo na ponta
+      const r = 3 + 7 * carga, g = ctx.createRadialGradient(tip[0], tip[1], 0, tip[0], tip[1], r);
+      g.addColorStop(0, 'rgba(255,255,255,.9)'); g.addColorStop(.4, 'rgba(255,160,210,.55)'); g.addColorStop(1, 'rgba(255,120,190,0)');
+      ctx.fillStyle = g; ctx.beginPath(); ctx.arc(tip[0], tip[1], r, 0, 7); ctx.fill();
+    }
+  }
+  function desenhaMadoka(t) {
+    if (!mad || !carimboMadoka) return;
+    const tl = tempoMad(t);
+    let a = 1, esc = 1;
+    if (tl < EV.surge) { const u = tl / EV.surge; a = u; esc = .45 + .55 * volta(u); }
+    else if (tl > EV.some) { const u = Math.min(1, (tl - EV.some) / .35); a = 1 - u; esc = 1 + .15 * u; }
+    if (a <= 0) return;
+    if (madP.plat) {                                    // o circulinho mágico debaixo dos pés
+      const rx = 27 * k * (.6 + .4 * esc), cx = madP.x + 2 * k, cy = madP.y + 1.5 * k;
+      ctx.save();
+      ctx.translate(cx, cy); ctx.scale(1, .26);
+      const g = ctx.createRadialGradient(0, 0, 0, 0, 0, rx);
+      g.addColorStop(0, 'rgba(255,200,230,' + f(.75 * a) + ')'); g.addColorStop(.6, 'rgba(255,130,195,' + f(.35 * a) + ')'); g.addColorStop(1, 'rgba(255,120,190,0)');
+      ctx.fillStyle = g; ctx.beginPath(); ctx.arc(0, 0, rx, 0, 7); ctx.fill();
+      ctx.globalAlpha = a; ctx.strokeStyle = '#ffe0ef'; ctx.lineWidth = 2.2 * k;
+      ctx.beginPath(); ctx.arc(0, 0, rx * .9, 0, 7); ctx.stroke();
+      ctx.strokeStyle = COR.rosa; ctx.lineWidth = 1.6 * k;
+      ctx.beginPath(); ctx.arc(0, 0, rx * .62, 0, 7); ctx.stroke();
+      ctx.fillStyle = '#fff';
+      for (let i = 0; i < 10; i++) { const an = t * 1.4 + i * Math.PI / 5; ctx.beginPath(); ctx.arc(Math.cos(an) * rx * .76, Math.sin(an) * rx * .76, 1.6 * k, 0, 7); ctx.fill(); }
+      ctx.restore();
+    }
+    const s = TAM_MA * k * esc;
+    ctx.save();
+    ctx.globalAlpha = a;
+    ctx.translate(madP.x, madP.y); ctx.scale(s, s);
+    ctx.drawImage(carimboMadoka, MADOKA_VB[0], MADOKA_VB[1], MADOKA_VB[2], MADOKA_VB[3]);
+    // a corda: puxa até EV.puxa, segura, solta e vibra
+    const u = tl < EV.surge ? 0 : Math.min(1, (tl - EV.surge) / (EV.puxa - EV.surge)), puxada = tl < EV.solta ? suave(u) : 0;
+    const vib = tl >= EV.solta ? Math.sin((tl - EV.solta) * 60) * Math.exp(-(tl - EV.solta) * 9) * 2.4 : 0;
+    const n = C_ARCO + PUXA * puxada + vib, P = [G[0] - D[0] * n, G[1] - D[1] * n];
+    ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+    ctx.strokeStyle = 'rgba(255,170,215,.55)'; ctx.lineWidth = 2.2;
+    ctx.beginPath(); ctx.moveTo(T1[0], T1[1]); ctx.lineTo(P[0], P[1]); ctx.lineTo(T2[0], T2[1]); ctx.stroke();
+    ctx.strokeStyle = '#fff'; ctx.lineWidth = .9; ctx.stroke();
+    if (tl >= EV.surge && tl < EV.solta) flechaLocal(P, a * Math.min(1, (tl - EV.surge) / .25), suave(u));
+    ctx.globalAlpha = a;
+    // o braço que puxa: a mão vai com a corda e fica lá atrás depois de soltar
+    const nm = tl < EV.solta ? n : C_ARCO + PUXA, mao = [G[0] - D[0] * nm, G[1] - D[1] * nm];
+    ctx.strokeStyle = CONT; ctx.lineWidth = 5.8;
+    ctx.beginPath(); ctx.moveTo(OMBRO[0], OMBRO[1]); ctx.lineTo(mao[0], mao[1]); ctx.stroke();
+    ctx.strokeStyle = '#fff'; ctx.lineWidth = 4.2; ctx.stroke();
+    ctx.fillStyle = '#fff'; ctx.strokeStyle = CONT; ctx.lineWidth = 1.2;
+    ctx.beginPath(); ctx.arc(mao[0], mao[1], 2.9, 0, 7); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#ff94c4';                          // a manga bufante por cima do ombro
+    ctx.beginPath(); ctx.ellipse(10.6, -42.6, 4.6, 3.9, 0, 0, 7); ctx.fill(); ctx.stroke();
+    ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.moveTo(6.4, -40.4); ctx.quadraticCurveTo(10.6, -38, 14.8, -40.4); ctx.stroke();
+    ctx.restore();
+    ctx.globalAlpha = 1;
+  }
+  function atualizaSeta(t) {
+    const u = Math.min(1, (t - seta.t0) / seta.dur), px = seta.x, py = seta.y;
+    seta.x = seta.x0 + (alvo.x - seta.x0) * u; seta.y = seta.y0 + (alvo.y - seta.y0) * u;
+    for (let i = 0; i < 2; i++) {                       // rastro de brilho
+      const v = Math.random();
+      faisca(px + (seta.x - px) * v + rnd(-3, 3) * k, py + (seta.y - py) * v + rnd(-3, 3) * k, rnd(2.5, 5) * k, rnd(.3, .6), escolhe(['#fff', COR.rosaClaro, '#ff9ccc']));
+    }
+    if (u >= 1) { seta = null; estouro(alvo.x, alvo.y, t); }
+  }
+  function desenhaSeta() {
+    if (!seta) return;
+    const s = TAM_MA * k, L = L_FLECHA * s, x = seta.x, y = seta.y, bx = x - D[0] * L, by = y - D[1] * L;
+    const rx = x - D[0] * L * 3.4, ry = y - D[1] * L * 3.4, g = ctx.createLinearGradient(rx, ry, x, y);
+    g.addColorStop(0, 'rgba(255,140,200,0)'); g.addColorStop(1, 'rgba(255,180,220,.75)');
+    ctx.lineCap = 'round';
+    ctx.strokeStyle = g; ctx.lineWidth = 7 * k;
+    ctx.beginPath(); ctx.moveTo(rx, ry); ctx.lineTo(x, y); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(bx, by); ctx.lineTo(x, y);
+    ctx.strokeStyle = '#ff8cc6'; ctx.lineWidth = 2.6 * s; ctx.stroke();
+    ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.1 * s; ctx.stroke();
+    const r = 11 * k, gl = ctx.createRadialGradient(x, y, 0, x, y, r);
+    gl.addColorStop(0, 'rgba(255,255,255,.95)'); gl.addColorStop(.4, 'rgba(255,160,210,.6)'); gl.addColorStop(1, 'rgba(255,120,190,0)');
+    ctx.fillStyle = gl; ctx.beginPath(); ctx.arc(x, y, r, 0, 7); ctx.fill();
+  }
+  function estouro(x, y, t) {
+    parts.push({ tipo: 'estouro', x, y, tam: 1, rot: rnd(0, 1), idade: 0, vida: .75 });
+    for (let i = 0; i < 16; i++) pluma(x, y);
+    for (let i = 0; i < 18; i++) petala(x, y, 1);
+    for (let i = 0; i < 10; i++) faisca(x + rnd(-30, 30) * k, y + rnd(-26, 26) * k, rnd(4, 8) * k, rnd(.5, 1), escolhe(['#fff', COR.rosaClaro, COR.douradoClaro]));
+    for (let i = 0; i < 16; i++) chuvaFila.push({ t: t + .1 + rnd(0, .9), x: x + rnd(-70, 100) * k, y: y + rnd(-24, 20) * k });
+    for (const p of penas) {                            // as penas que já estavam caindo levam um sopro
+      const dx = p.x - x, dy = p.y - y, d = Math.hypot(dx, dy) || 1;
+      if (d < 240 * k) { const fz = (1 - d / (240 * k)) * 170 * k; p.ix += dx / d * fz; p.iy += dy / d * fz - 30 * k; p.gira += rnd(-6, 6); }
+    }
+    brilhoPlaca();
+    onda();
+    if (kb) falar(C.falaFlecha, 2.4);
+  }
+
+  // ================================================================
+  //  partículas (canvas): faíscas, pétalas, penas soltas, o estouro e a chuva de flechinhas
+  // ================================================================
+  const parts = [], MAXP = 420;
+  function faisca(x, y, tam, vida, cor) { if (parts.length < MAXP) parts.push({ tipo: 'faisca', x, y, vx: rnd(-10, 10) * k, vy: rnd(-14, 6) * k, tam, vida, idade: 0, rot: rnd(0, 1.5), cor }); }
+  function petala(x, y, forca) {
+    if (parts.length >= MAXP) return;
+    const a = rnd(0, Math.PI * 2), v = rnd(50, 170) * k * forca;
+    parts.push({ tipo: 'petala', x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 40 * k * forca, w: rnd(2.6, 4) * k, h: rnd(1.6, 2.4) * k, rot: rnd(0, 6), vr: rnd(-7, 7),
+                 fase: rnd(0, 7), vida: rnd(1.1, 1.8), idade: 0, cor: escolhe([COR.rosa, COR.rosaClaro, '#fff', '#ff9ccc', COR.rosaEscuro]) });
+  }
+  function pluma(x, y) {
+    if (parts.length >= MAXP) return;
+    const a = rnd(0, Math.PI * 2), v = rnd(70, 200) * k;
+    parts.push({ tipo: 'pluma', x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 30 * k, rot: rnd(0, 6), vr: rnd(-8, 8), fase: rnd(0, 7),
+                 tam: TAM_PENA * k * rnd(.7, 1.05), cor: Math.floor(rnd(0, CORES_PENA.length)), vida: rnd(2, 3), idade: 0 });
+  }
+  function chuva(x, y) { if (parts.length < MAXP) parts.push({ tipo: 'chuva', x, y, vx: -60 * k, vy: rnd(380, 470) * k, vida: rnd(.55, .8), idade: 0 }); }
+  function puf(x, y, tam) {                             // brilho de chegada e de saída da Madoka
+    parts.push({ tipo: 'estouro', x, y, tam, rot: rnd(0, 1), idade: 0, vida: .5 });
+    for (let i = 0; i < 10; i++) petala(x + rnd(-8, 8) * k, y + rnd(-14, 14) * k, .6);
+    for (let i = 0; i < 8; i++) faisca(x + rnd(-24, 24) * k, y + rnd(-30, 30) * k, rnd(3.5, 6) * k, rnd(.4, .8), escolhe(['#fff', COR.rosaClaro, COR.douradoClaro]));
+  }
+  function desenhaBrilho(x, y, s, rt) {
+    ctx.save(); ctx.translate(x, y); ctx.rotate(rt);
+    ctx.beginPath();
+    ctx.moveTo(0, -s); ctx.quadraticCurveTo(s * .18, -s * .18, s, 0); ctx.quadraticCurveTo(s * .18, s * .18, 0, s);
+    ctx.quadraticCurveTo(-s * .18, s * .18, -s, 0); ctx.quadraticCurveTo(-s * .18, -s * .18, 0, -s);
+    ctx.fill(); ctx.restore();
+  }
+  function desenhaParticulas(t, dt) {
+    for (let i = parts.length - 1; i >= 0; i--) {
+      const p = parts[i];
+      p.idade += dt;
+      if (p.idade >= p.vida) { parts.splice(i, 1); continue; }
+      const u = p.idade / p.vida;
+      if (p.tipo === 'estouro') {                       // clarão, anel e raios de luz
+        const s = p.tam * k, e = 1 - u, R = (14 + 60 * u) * s, g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, R);
+        g.addColorStop(0, 'rgba(255,255,255,' + f(.95 * e) + ')'); g.addColorStop(.35, 'rgba(255,160,210,' + f(.6 * e) + ')'); g.addColorStop(1, 'rgba(255,120,190,0)');
+        ctx.globalAlpha = 1; ctx.fillStyle = g;
+        ctx.beginPath(); ctx.arc(p.x, p.y, R, 0, 7); ctx.fill();
+        ctx.globalAlpha = e; ctx.strokeStyle = '#ffd0e8'; ctx.lineWidth = 3 * s * e + .5;
+        ctx.beginPath(); ctx.arc(p.x, p.y, (12 + 80 * u) * s, 0, 7); ctx.stroke();
+        ctx.strokeStyle = '#fff'; ctx.lineWidth = 2 * s * e + .3; ctx.lineCap = 'round';
+        ctx.beginPath();
+        for (let j = 0; j < 12; j++) {
+          const an = j * Math.PI / 6 + u * .5 + p.rot, r1 = (10 + 36 * u) * s, r2 = (22 + 84 * u) * s * (j % 2 ? .7 : 1);
+          ctx.moveTo(p.x + Math.cos(an) * r1, p.y + Math.sin(an) * r1); ctx.lineTo(p.x + Math.cos(an) * r2, p.y + Math.sin(an) * r2);
+        }
+        ctx.stroke();
+        continue;
+      }
+      let a = (u > .7 ? (1 - u) / .3 : 1) * naFonte(p.x, p.y);
+      if (p.tipo === 'faisca') {
+        p.x += p.vx * dt; p.y += p.vy * dt;
+        if (a <= 0) continue;
+        ctx.globalAlpha = a; ctx.fillStyle = p.cor;
+        desenhaBrilho(p.x, p.y, p.tam * Math.sin(Math.min(1, u * 1.4) * Math.PI), p.rot + u * 1.4);
+      } else if (p.tipo === 'petala') {
+        p.vx *= 1 - Math.min(1, 1.8 * dt); p.vy = p.vy * (1 - Math.min(1, 1.8 * dt)) + 90 * k * dt;
+        p.x += (p.vx + Math.sin(t * 4 + p.fase) * 18 * k) * dt; p.y += p.vy * dt; p.rot += p.vr * dt;
+        a *= pertoCam(p.x, p.y, 12 * k);
+        if (a <= 0) continue;
+        ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.rot); ctx.scale(1, Math.cos(t * 7 + p.fase));
+        ctx.globalAlpha = a; ctx.fillStyle = p.cor;
+        ctx.beginPath(); ctx.ellipse(0, 0, p.w, p.h, 0, 0, 7); ctx.fill();
+        ctx.restore();
+      } else if (p.tipo === 'pluma') {                  // pena solta do estouro: sai voando e cai balançando
+        p.vx *= 1 - Math.min(1, 2.2 * dt); p.vy = p.vy * (1 - Math.min(1, 2.2 * dt)) + 60 * k * dt;
+        p.x += (p.vx + Math.sin(t * 3 + p.fase) * 14 * k) * dt; p.y += p.vy * dt; p.rot += p.vr * dt; p.vr *= 1 - Math.min(1, dt * .8);
+        a *= pertoCam(p.x, p.y, 16 * k);
+        if (a <= 0 || !carimbosPena.length) continue;
+        ctx.save(); ctx.globalAlpha = a; ctx.translate(p.x, p.y); ctx.rotate(p.rot + Math.sin(t * 4 + p.fase) * .4); ctx.scale(p.tam, p.tam);
+        ctx.drawImage(carimbosPena[p.cor], PENA_VB[0], PENA_VB[1], PENA_VB[2], PENA_VB[3]);
+        ctx.restore();
+      } else if (p.tipo === 'chuva') {                  // flechinha de luz caindo
+        p.x += p.vx * dt; p.y += p.vy * dt;
+        a *= pertoCam(p.x, p.y, 30 * k) * Math.min(1, u * 6);
+        if (a <= 0) continue;
+        const L = 30 * k, n = Math.hypot(p.vx, p.vy), ux = p.vx / n, uy = p.vy / n, g = ctx.createLinearGradient(p.x - ux * L, p.y - uy * L, p.x, p.y);
+        g.addColorStop(0, 'rgba(255,140,200,0)'); g.addColorStop(.7, 'rgba(255,150,205,.85)'); g.addColorStop(1, '#fff');
+        ctx.globalAlpha = a; ctx.strokeStyle = g; ctx.lineWidth = 2.2 * k; ctx.lineCap = 'round';
+        ctx.beginPath(); ctx.moveTo(p.x - ux * L, p.y - uy * L); ctx.lineTo(p.x, p.y); ctx.stroke();
+        ctx.fillStyle = '#fff';
+        ctx.beginPath(); ctx.moveTo(p.x + ux * 4.5 * k, p.y + uy * 4.5 * k); ctx.lineTo(p.x - uy * 2 * k, p.y + ux * 2 * k); ctx.lineTo(p.x + uy * 2 * k, p.y - ux * 2 * k); ctx.fill();
+      }
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  // ================================================================
+  //  balõezinhos do Kyubey
+  // ================================================================
+  let balaoEl = null, tiraBalao = 0, tiraFala = 0, ultimaFala = '';
+  function balao(texto, ax, ay, dur) {
+    if (balaoEl) balaoEl.remove();
+    clearTimeout(tiraBalao);
+    const fs = 17 * k;
+    medidor.font = fs + 'px ' + FAMILIA;
+    const tw = medidor.measureText(texto).width, bw = tw + 24 * k, bh = fs * 1.4 + 8 * k;
+    let cx = ax, cy = ay - bh / 2 - 16 * k;
+    cx = Math.min(Math.min(RR, LIM_DIR) - bw / 2 - 4 * k, Math.max(RX + bw / 2 + 4 * k, cx));
+    cy = Math.min(RB - bh / 2 - 4 * k, Math.max(RY + bh / 2 + 4 * k, cy));
+    if (cx + bw / 2 > X && cx - bw / 2 < X + W && cy + bh / 2 > Y && cy - bh / 2 < Y + H) {   // nunca em cima da câmera: vai pro lado de fora, ou pra cima dela
+      if (X - 6 * k - bw >= RX + 4 * k) cx = X - 6 * k - bw / 2;
+      else cy = Math.max(RY + bh / 2 + 2 * k, Y - bh / 2 - 8 * k);
+    }
+    const x0 = cx - bw / 2, y0 = cy - bh / 2, y1 = cy + bh / 2;
+    const bx = Math.min(x0 + bw - bh / 2 - 2 * k, Math.max(x0 + bh / 2 + 2 * k, ax)), ty = Math.max(ay, y1 + 6 * k);
+    const cauda = 'M' + f(bx - 6 * k) + ' ' + f(y1 - 2.5 * k) + 'L' + f(ax + (ax - bx) * .2) + ' ' + f(ty) + 'L' + f(bx + 6 * k) + ' ' + f(y1 - 2.5 * k) + 'Z';
+    const caixa = 'x="' + f(x0) + '" y="' + f(y0) + '" width="' + f(bw) + '" height="' + f(bh) + '" rx="' + f(bh / 2) + '"';
+    const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    g.setAttribute('class', 'balao');
+    g.innerHTML = '<rect ' + caixa + ' transform="translate(' + f(2 * k) + ' ' + f(3 * k) + ')" fill="rgba(0,0,0,.3)"/>' +
+      '<path d="' + cauda + '" fill="#fff" stroke="' + CONT + '" stroke-width="' + f(2.4 * k) + '" stroke-linejoin="round"/>' +
+      '<rect ' + caixa + ' fill="#fff" stroke="' + CONT + '" stroke-width="' + f(2.4 * k) + '"/>' +
+      '<rect x="' + f(x0 + 2.6 * k) + '" y="' + f(y0 + 2.6 * k) + '" width="' + f(bw - 5.2 * k) + '" height="' + f(bh - 5.2 * k) + '" rx="' + f(bh / 2 - 2.6 * k) + '" fill="none" stroke="' + COR.rosaClaro + '" stroke-width="' + f(1.2 * k) + '"/>' +
+      '<path d="' + cauda + '" fill="#fff"/>' +
+      '<text x="' + f(cx + 1.2 * k) + '" y="' + f(cy + fs * .36 + 1.2 * k) + '" text-anchor="middle" font-family=\'' + FAMILIA.replace(/"/g, '') + '\' font-size="' + f(fs) + '" fill="' + COR.rosaClaro + '"></text>' +
+      '<text x="' + f(cx) + '" y="' + f(cy + fs * .36) + '" text-anchor="middle" font-family=\'' + FAMILIA.replace(/"/g, '') + '\' font-size="' + f(fs) + '" fill="' + COR.magenta + '"></text>';
+    for (const tx of g.querySelectorAll('text')) tx.textContent = texto;
+    topo.appendChild(g);
+    balaoEl = g;
+    if (g.animate) g.animate([{ transform: 'scale(.2)', opacity: 0 }, { transform: 'scale(1.12)', opacity: 1, offset: .6 }, { transform: 'scale(1)', opacity: 1 }], { duration: 280, easing: 'ease-out' });
+    tiraBalao = setTimeout(() => {
+      const sai = () => { if (balaoEl === g) balaoEl = null; g.remove(); };
+      if (g.animate) g.animate([{ transform: 'scale(1)', opacity: 1 }, { transform: 'scale(.3)', opacity: 0 }], { duration: 220, easing: 'ease-in' }).onfinish = sai;
+      else sai();
+    }, (dur || 2.8) * 1000);
+  }
+  function falar(texto, dur) {                          // o Kyubey fala (sem Kyubey, o balão sai da fita)
+    if (kb) {
+      kbEl.classList.add('fala');
+      clearTimeout(tiraFala);
+      tiraFala = setTimeout(() => kbEl.classList.remove('fala'), 900);
+      balao(texto, kb.x + (kb.espelho ? 3 : -3) * k, kb.topo + 4 * k, dur);
+    } else if (placa) balao(texto, placa.x0, placa.y0 + 12 * k, dur);
+  }
+  function fala() {
+    if (!FALAS.length || (!kb && !placa)) return;
+    let txt = escolhe(FALAS);
+    for (let i = 0; i < 5 && FALAS.length > 1 && txt === ultimaFala; i++) txt = escolhe(FALAS);
+    ultimaFala = txt;
+    falar(txt);
+  }
+
+  // ================================================================
+  //  a fita pula e os enfeites pulam em onda
+  // ================================================================
+  function brilhoPlaca() {
+    if (placaEl && placaEl.animate) {
+      placaEl.animate([
+        { transform: 'scale(1) rotate(0deg)' }, { transform: 'scale(1.18) rotate(-3deg)', offset: .25 },
+        { transform: 'scale(.96) rotate(2deg)', offset: .5 }, { transform: 'scale(1.04) rotate(-1deg)', offset: .75 },
+        { transform: 'scale(1) rotate(0deg)' },
+      ], { duration: 850, easing: 'ease-out' });
+    }
+    if (!placa) return;
+    for (let i = 0; i < 14; i++) petala(placa.cx + rnd(-.5, .5) * placa.TH, rnd(placa.y0, placa.y1), .8);
+    for (let i = 0; i < 8; i++) faisca(placa.cx + rnd(-.8, .8) * placa.TH, rnd(placa.y0, placa.y1), rnd(4, 7.5) * k, rnd(.5, 1), escolhe([COR.douradoClaro, '#fff', COR.rosaClaro]));
+  }
+  function onda() {                                     // tudo pula, em onda a partir do nome
+    const cx = placa ? placa.cx : X + W / 2;
+    for (const el of cena.querySelectorAll('.pop')) {
+      const d = Math.abs(el.dataset.x - cx) / Math.max(W, 200 * k);
+      if (el.animate) el.animate([{ transform: 'scale(1)' }, { transform: 'scale(1.16)', offset: .35 }, { transform: 'scale(.96)', offset: .7 }, { transform: 'scale(1)' }],
+        { duration: 560, delay: 60 + d * 600, easing: 'ease-out' });
+    }
+  }
+
+  // ================================================================
+  //  encaixe na janela / fonte do OBS
+  // ================================================================
+  let K = 1;
+  function ajustar() {
+    let s = Math.min(innerWidth / SW, innerHeight / SH);
+    let ox = (innerWidth - SW * s) / 2, oy = (innerHeight - SH * s) / 2;
+    if (zoom) {                                        // prévia: só a moldura, bem de perto
+      s = Math.min(innerWidth / RW, innerHeight / RH);
+      ox = (innerWidth - RW * s) / 2 - RX * s; oy = (innerHeight - RH * s) / 2 - RY * s;
+    }
+    palco.style.transform = 'translate(' + ox + 'px,' + oy + 'px) scale(' + s + ')';
+    K = s * (window.devicePixelRatio || 1);
+    canvas.width = Math.max(1, Math.round(RW * K)); canvas.height = Math.max(1, Math.round(RH * K));
+    prepararCarimbos();
+  }
+
+  // ================================================================
+  //  loop
+  // ================================================================
+  let last = 0, proxFlecha = 0, proxFaisca = 0, proxFala = 0;
+  function frame(ms) {
+    const t = ms / 1000, dt = Math.min(.05, Math.max(0, t - last));
+    last = t;
+    if (FLECHA > 0 && t >= proxFlecha && !mad && !seta) { flecha(t); proxFlecha = t + FLECHA; }
+    if (FALAS.length && t >= proxFala) {               // balãozinho do Kyubey (fora da flecha, que já tem a fala dela)
+      const livre = t > evAte + .5;
+      if (livre) fala();
+      proxFala = t + (livre ? C.falasCada * rnd(.75, 1.25) : 2);
+    }
+    if (t >= proxFaisca && flores.length) {            // brilhinho de vez em quando na fita, na gema, no Kyubey ou nas rosas
+      const fl = escolhe(flores);
+      faisca(fl.x + rnd(-.8, .8) * fl.r, fl.y + rnd(-.8, .8) * fl.r, rnd(4, 6.5) * k, rnd(.5, .8), escolhe([COR.douradoClaro, '#fff', COR.rosaClaro]));
+      proxFaisca = t + rnd(1, 2.4);
+    }
+    for (let i = chuvaFila.length - 1; i >= 0; i--) if (t >= chuvaFila[i].t) { chuva(chuvaFila[i].x, chuvaFila[i].y); chuvaFila.splice(i, 1); }
+    tb += dt * VEL;
+    for (const p of penas) moverPena(p, dt);
+    if (mad) atualizaMadoka(t);
+    if (seta) atualizaSeta(t);
+
+    ctx.setTransform(K, 0, 0, K, -RX * K, -RY * K);
+    ctx.clearRect(RX, RY, RW, RH);
+    desenhaPenas();
+    desenhaParticulas(t, dt);
+    desenhaMadoka(t);
+    desenhaSeta();
+    requestAnimationFrame(frame);
+  }
+
+  function comecar() {
+    if (comecou) return;
+    comecou = true;
+    montar();
+    ajustar();
+    addEventListener('resize', ajustar);
+    const t = performance.now() / 1000;
+    last = t; proxFlecha = t + (CONGELA ? .6 : 3); proxFaisca = t + 1; proxFala = t + 7;
+    addEventListener('pointerdown', () => {            // clique (ou "Interagir" no OBS) = flecha agora
+      const now = performance.now() / 1000;
+      if (now - evT0 > 1.2 && !mad && !seta) { flecha(now); if (FLECHA > 0) proxFlecha = now + FLECHA; }
+    });
+    requestAnimationFrame(frame);
+  }
+  Promise.race([Promise.all([document.fonts.load('22px "' + C.fonte + '"', NOME || 'L'), document.fonts.load('17px "' + C.fonte + '"', FALAS.join('') + C.falaFlecha)]),
+                new Promise(r => setTimeout(r, 3000))]).then(comecar, comecar);
+})();
+</script>
+</body>
+</html>
